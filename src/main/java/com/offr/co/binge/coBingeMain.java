@@ -4,18 +4,70 @@
  */
 package com.offr.co.binge;
 
-/**
- *
- * @author boni
- */
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+
+
 public class coBingeMain extends javax.swing.JFrame {
 
-    /**
-     * Creates new form coBingeMain
-     */
+    
+   
     public coBingeMain() {
         initComponents();
     }
+    
+public class RoundedBorder implements Border {
+    private int radius;
+    private Color borderColor;
+    private Color backgroundColor;
+
+    public RoundedBorder(int radius, Color borderColor, Color backgroundColor) {
+        this.radius = radius;
+        this.borderColor = borderColor != null ? borderColor : Color.GRAY;
+        this.backgroundColor = backgroundColor;
+    }
+
+    @Override
+    public Insets getBorderInsets(Component c) {
+        return new Insets(8, 12, 8, 12);  // better padding for text
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return false; // IMPORTANT
+    }
+
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Handle the button's background properly (prevents white flash on click)
+        if (c instanceof javax.swing.AbstractButton) {
+            javax.swing.AbstractButton button = (javax.swing.AbstractButton) c;
+            if (button.isContentAreaFilled()) {
+                g2.setColor(backgroundColor != null ? backgroundColor : c.getBackground());
+                g2.fillRoundRect(x, y, width - 1, height - 1, radius, radius);
+            }
+        } else if (backgroundColor != null) {
+            g2.setColor(backgroundColor);
+            g2.fillRoundRect(x, y, width - 1, height - 1, radius, radius);
+        }
+
+        // Draw border line
+        g2.setColor(borderColor);
+        g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+
+        g2.dispose();
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,65 +78,105 @@ public class coBingeMain extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
+        mainPanel = new javax.swing.JPanel();
+        mainTabs = new javax.swing.JTabbedPane();
+        homePanel = new javax.swing.JPanel();
+        hostPartyBtn = new javax.swing.JButton();
+        hostPartyPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBackground(new java.awt.Color(153, 102, 255));
+        mainPanel.setBackground(new java.awt.Color(51, 51, 51));
+        mainPanel.setLayout(null);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        homePanel.setBackground(new java.awt.Color(245, 244, 251));
+
+        hostPartyBtn.setText("Host ");
+        hostPartyBtn.setFocusPainted(false);
+        hostPartyBtn.setFocusable(false);
+        hostPartyBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hostPartyBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout homePanelLayout = new javax.swing.GroupLayout(homePanel);
+        homePanel.setLayout(homePanelLayout);
+        homePanelLayout.setHorizontalGroup(
+            homePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(homePanelLayout.createSequentialGroup()
+                .addGap(85, 85, 85)
+                .addComponent(hostPartyBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(97, Short.MAX_VALUE))
+        );
+        homePanelLayout.setVerticalGroup(
+            homePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(homePanelLayout.createSequentialGroup()
+                .addGap(58, 58, 58)
+                .addComponent(hostPartyBtn)
+                .addContainerGap(604, Short.MAX_VALUE))
+        );
+
+        hostPartyBtn.setBorder(new RoundedBorder(35, Color.GRAY, new Color(255, 255, 255, 120)));
+        hostPartyBtn.setOpaque(false);            // keeps border transparency
+        hostPartyBtn.setContentAreaFilled(false); // IMPORTANT: stops default white fill on click
+        hostPartyBtn.setFocusPainted(false);      // removes the focus rectangle when clicked
+
+        mainTabs.addTab("tab1", homePanel);
+        //homePanel.setBorder(new RoundedBorder(35, Color.GRAY, new Color(255,255,255,120)));
+        //homePanel.setOpaque(false);
+
+        javax.swing.GroupLayout hostPartyPanelLayout = new javax.swing.GroupLayout(hostPartyPanel);
+        hostPartyPanel.setLayout(hostPartyPanelLayout);
+        hostPartyPanelLayout.setHorizontalGroup(
+            hostPartyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 409, Short.MAX_VALUE)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 670, Short.MAX_VALUE)
+        hostPartyPanelLayout.setVerticalGroup(
+            hostPartyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 685, Short.MAX_VALUE)
         );
+
+        mainTabs.addTab("tab2", hostPartyPanel);
+
+        mainPanel.add(mainTabs);
+        mainTabs.setBounds(0, -50, 409, 720);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(mainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(mainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 670, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void hostPartyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hostPartyBtnActionPerformed
+        mainTabs.setSelectedIndex(1);
+    }//GEN-LAST:event_hostPartyBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(coBingeMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(coBingeMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(coBingeMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(coBingeMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
+         try {
+            // Set FlatLaf light or dark theme
+            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }       
+        
+        FontLoader.loadFonts(); 
+        
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new coBingeMain().setVisible(true);
@@ -93,6 +185,10 @@ public class coBingeMain extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel homePanel;
+    private javax.swing.JButton hostPartyBtn;
+    private javax.swing.JPanel hostPartyPanel;
+    private javax.swing.JPanel mainPanel;
+    private javax.swing.JTabbedPane mainTabs;
     // End of variables declaration//GEN-END:variables
 }
