@@ -1,2 +1,18 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+	let dark = false;
+
+	function toggleDarkMode() {
+		dark = !dark;
+	}
+</script>
+
+<div class="container" class:dark={dark}>
+	<div class="buttons">
+		<button class="main-btn">Host</button>
+		<button class="main-btn">Join</button>
+	</div>
+
+	<div class="dark-toggle" on:click={toggleDarkMode}>
+		🌙
+	</div>
+</div>

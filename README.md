@@ -15,7 +15,7 @@ To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-npx sv@0.12.5 create --template minimal --types jsdoc --install npm coBinge-tr-sv
+npx sv@0.12.5 create --template minimal --types jsdoc --install npm .
 ```
 
 ## Developing
