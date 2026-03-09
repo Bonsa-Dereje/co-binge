@@ -1,51 +1,91 @@
+/* Universal font and background */
+@font-face {
+    font-family: "DM Mono";
+    src: url("/fonts/DMMono-Regular.ttf") format("ttf");
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    margin: 0;
+    font-family: "DM Mono", monospace;
+    background-color: #FAFAFA;
+    color: #212121;
+}
+
+/* Container for all pages */
 .container {
-	height: 100vh;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	background: #f5f5f5;
-	transition: background 0.3s ease;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.container.dark {
-	background: #121212;
+/* Cards for page content */
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
 }
 
-.buttons {
-	display: flex;
-	gap: 20px;
+/* Buttons */
+button {
+    font-family: "DM Mono", monospace;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
-.main-btn {
-	padding: 12px 32px;
-	font-size: 18px;
-	border-radius: 30px;
-	border: 2px solid #444;
-	background: white;
-	cursor: pointer;
-	transition: all 0.2s ease;
+/* Create account / primary button style */
+.create-button {
+    background-color: #212121;
+    color: white;
+    border-radius: 25px;
+    border: none;
 }
 
-.main-btn:hover {
-	background: black;
-	color: white;
+/* Input fields */
+input {
+    font-family: "DM Mono", monospace;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 8px;
 }
 
-.dark .main-btn {
-	background: #1e1e1e;
-	color: white;
-	border-color: #888;
+/* Avatar */
+.avatar-container img {
+    width: 120px;
+    height: auto;
+    border-radius: 50%;
+    display: block;
+    margin: 0 auto;
 }
 
-.dark .main-btn:hover {
-	background: white;
-	color: black;
+/* Toggle switches */
+.toggle {
+    width: 50px;
+    height: 25px;
+    border-radius: 25px;
+    background-color: #ccc;
+    border: none;
+    position: relative;
 }
 
-.dark-toggle {
-	position: absolute;
-	bottom: 25px;
-	font-size: 24px;
-	cursor: pointer;
+.toggle.active {
+    background-color: #212121;
+}
+
+.toggle-circle {
+    width: 23px;
+    height: 23px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.3s;
+}
+
+.toggle.active .toggle-circle {
+    transform: translateX(25px);
 }

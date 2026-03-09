@@ -1,18 +1,18 @@
 <script>
-	let dark = false;
+    import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
 
-	function toggleDarkMode() {
-		dark = !dark;
-	}
+    onMount(() => {
+        const timer = setTimeout(() => {
+            goto('/userSetup');
+        }, 10000);
+
+        return () => clearTimeout(timer);
+    });
 </script>
 
-<div class="container" class:dark={dark}>
-	<div class="buttons">
-		<button class="main-btn">Host</button>
-		<button class="main-btn">Join</button>
-	</div>
-
-	<div class="dark-toggle" on:click={toggleDarkMode}>
-		🌙
-	</div>
+<div class="container">
+    <div class="title">coBinge</div>
 </div>
+
+<style src="../style.css"></style>
