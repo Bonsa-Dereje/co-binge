@@ -5,7 +5,7 @@
     onMount(() => {
         const timer = setTimeout(() => {
             goto('/userSetup');
-        }, 10000);
+        }, 3000);
 
         return () => clearTimeout(timer);
     });

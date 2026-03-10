@@ -1,4 +1,6 @@
-/* Universal font and background */
+/* ------------------------------
+   Universal Font
+-------------------------------- */
 @font-face {
     font-family: "DM Mono";
     src: url("/fonts/DMMono-Regular.ttf") format("ttf");
@@ -6,86 +8,259 @@
     font-style: normal;
 }
 
+/* ------------------------------
+   Light Mode (default)
+-------------------------------- */
 body {
     margin: 0;
     font-family: "DM Mono", monospace;
-    background-color: #FAFAFA;
-    color: #212121;
+    background-color: #FAFAFA; /* light background */
+    color: #212121; /* text color black */
+    transition: all 0.3s ease;
 }
 
-/* Container for all pages */
+/* Buttons (light mode) */
+button {
+    font-family: "DM Mono", monospace;
+    background-color: #212121; /* black button */
+    color: #FAFAFA; /* white text */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #333333;
+}
+
+/* Containers */
 .container {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: all 0.3s ease;
 }
 
-/* Cards for page content */
+/* ------------------------------
+   Dark Mode
+-------------------------------- */
+body.dark-mode {
+    background-color: #121212; /* dark background */
+    color: #FAFAFA; /* white text */
+}
+
+body.dark-mode button {
+    background-color: #FAFAFA; /* white button */
+    color: #121212; /* black text */
+}
+
+body.dark-mode button:hover {
+    background-color: #e0e0e0;
+}
+
+
+/* apple style toggle on top center */
+
+/* Page wrapper */
+.page-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100vw;       /* full width */
+    height: 100vh;      /* full height */
+    overflow: hidden;   /* hides any scrollbars */
+}
+
+/* Card */
 .card {
-    background-color: white;
+    width: 400px;
+    height: 600px;
+    border: 1px solid #212121;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative; /* needed if you want absolute positioning for any child */
     padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
 }
 
-/* Buttons */
-button {
-    font-family: "DM Mono", monospace;
-    cursor: pointer;
-    transition: all 0.3s;
+
+.toggle-wrapper {
+ 
+    position: relative;
+    margin-top: 28px;
+    margin-bottom: -7px; 
 }
 
-/* Create account / primary button style */
-.create-button {
-    background-color: #212121;
-    color: white;
-    border-radius: 25px;
-    border: none;
-}
-
-/* Input fields */
-input {
-    font-family: "DM Mono", monospace;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    padding: 8px;
-}
-
-/* Avatar */
-.avatar-container img {
-    width: 120px;
-    height: auto;
-    border-radius: 50%;
-    display: block;
-    margin: 0 auto;
-}
-
-/* Toggle switches */
 .toggle {
-    width: 50px;
-    height: 25px;
-    border-radius: 25px;
-    background-color: #ccc;
+    width: 70px;
+    height: 22px;
+    border-radius: 26px;
     border: none;
+    background: #212121;   
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s ease;
     position: relative;
 }
 
 .toggle.active {
-    background-color: #212121;
+    background: #e5e5e5;
 }
 
 .toggle-circle {
-    width: 23px;
-    height: 23px;
-    background-color: white;
-    border-radius: 50%;
+    width: 32px;
+    height: 18px;
+    background: white;
+    border-radius: 14px;
     position: absolute;
-    top: 1px;
-    left: 1px;
-    transition: transform 0.3s;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.15);
 }
 
 .toggle.active .toggle-circle {
-    transform: translateX(25px);
+    transform: translateX(34px);
+}
+
+.toggle:active .toggle-circle {
+    transform: scale(0.96);
+}
+
+
+.avatar-wrapper {
+    margin-top: 100px;
+    margin-bottom: 6px;
+}
+
+.avatar {
+    width: 150px;
+    border-radius: 50%;
+}
+
+
+.username-wrapper {
+    margin-bottom: -7px;
+}
+
+.username-input {
+    width: 80px;
+    height: 5px;
+    padding: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    border: 1.5px solid #212121;
+    border-radius: 25px;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 3px;
+}
+
+
+.device-wrapper {
+    margin-bottom: 15px;
+}
+
+.device-id {
+    font-size: 12px;
+    color: #000000;
+}
+body.dark-mode .device-id {
+    color: #FAFAFA;
+}
+
+.create-wrapper {
+    margin-top: -7px; /* push to bottom if you want */
+}
+
+.create-button {
+    width: 259px;
+    height: 37px;
+    padding: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    border-radius: 25px;
+    background-color: #212121;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.create-button:hover {
+    background-color: #333;
+}
+
+
+
+/* host/join page */
+
+
+
+/* ------------------------------
+   Host / Join Layout
+--------------------------------*/
+
+.session-wrapper {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.session-button {
+    width: 110px;
+    height: 40px;
+    border-radius: 25px;
+    font-size: 14px;
+}
+
+.session-divider {
+    width: 1px;
+    height: 40px;
+    background: #212121;
+}
+
+body.dark-mode .session-divider {
+    background: #FAFAFA;
+}
+
+
+/* ------------------------------
+   Bottom Profile
+--------------------------------*/
+
+.profile-wrapper {
+    position: absolute;
+    bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-avatar {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    margin-bottom: 6px;
+}
+
+.profile-name {
+    font-size: 13px;
+}
+
+.profile-device {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+body.dark-mode .profile-device {
+    color: #FAFAFA;
 }
