@@ -4,12 +4,17 @@
     let userName = '';
     let deviceId = '01D4TH879';
     let darkMode = false;
+    let leaving = false;
 
     function handleCreateAccount() {
         console.log('Creating account for:', userName);
 
-        // navigate to hostJoin page
-        goto('/hostJoin');
+        leaving = true;
+
+        // wait for animation to finish
+        setTimeout(() => {
+            goto('/hostJoin');
+        }, 600);
     }
 
     function toggleDarkMode() {
@@ -18,12 +23,10 @@
     }
 </script>
 
-<div class="page-wrapper">
+<div class="page-wrapper" class:leaving={leaving}>
 
-    <!-- Card -->
     <div class="card">
 
-        <!-- Toggle container -->
         <div class="toggle-wrapper">
             <button 
                 class="toggle"
@@ -35,12 +38,10 @@
             </button>
         </div>
 
-        <!-- Avatar container -->
         <div class="avatar-wrapper">
             <img src="/avatars/girlAvatar.png" alt="Avatar" class="avatar" />
         </div>
 
-        <!-- Username container -->
         <div class="username-wrapper">
             <input 
                 type="text"
@@ -50,12 +51,10 @@
             />
         </div>
 
-        <!-- Device ID container -->
         <div class="device-wrapper">
             <p class="device-id">device id: {deviceId}</p>
         </div>
 
-        <!-- Create Account container -->
         <div class="create-wrapper">
             <button 
                 on:click={handleCreateAccount}

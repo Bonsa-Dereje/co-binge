@@ -189,21 +189,54 @@ body.dark-mode .device-id {
     color: white;
     border: none;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s,
+    transform 0.1s ease-in-out; 
 }
 
 .create-button:hover {
     background-color: #333;
 }
 
+.create-button:active {
+    transform: scale(0.95); /* button slightly shrinks on click */
+    background-color: #111; /* optional darker effect when clicked */
+}
 
 
-/* host/join page */
+
+/* avatar shrink animation */
+
+.avatar {
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+/* text fade animation */
+
+.username-wrapper,
+.device-wrapper,
+.create-wrapper {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* animation trigger */
+
+.page-wrapper.leaving .avatar {
+    transform: scale(0.45) translateY(140px);
+}
+
+/* fade out text */
+
+.page-wrapper.leaving .username-wrapper,
+.page-wrapper.leaving .device-wrapper,
+.page-wrapper.leaving .create-wrapper {
+    opacity: 0;
+    transform: translateY(15px);
+}
 
 
 
 /* ------------------------------
-   Host / Join Layout
+   Host / Join Section
 --------------------------------*/
 
 .session-wrapper {
@@ -213,6 +246,18 @@ body.dark-mode .device-id {
     display: flex;
     align-items: center;
     gap: 25px;
+    margin-top: -19px;
+
+    opacity: 1;
+    transition: transform 0.55s cubic-bezier(.22,.61,.36,1),
+                opacity 0.45s ease;
+}
+
+/* start state */
+
+.page-wrapper.entering .session-wrapper {
+    transform: translateY(-35%);
+    opacity: 0;
 }
 
 .session-button {
@@ -243,14 +288,27 @@ body.dark-mode .session-divider {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    transition: transform 0.65s cubic-bezier(.22,.61,.36,1),
+                opacity 0.2s ease;
 }
+
+/* start position */
+
+.page-wrapper.entering .profile-wrapper {
+    transform: translateY(-220px) scale(0.6);
+    opacity: 0.8;
+}
+
+/* avatar */
 
 .profile-avatar {
     width: 55px;
-    height: 55px;
     border-radius: 50%;
     margin-bottom: 6px;
 }
+
+/* text */
 
 .profile-name {
     font-size: 13px;

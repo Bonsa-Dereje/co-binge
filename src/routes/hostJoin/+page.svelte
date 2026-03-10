@@ -1,6 +1,15 @@
 <script>
+    import { onMount } from 'svelte';
+
+    let entering = true;
     let darkMode = false;
     let deviceId = "01D4TH879";
+
+    onMount(() => {
+        requestAnimationFrame(() => {
+            entering = false;
+        });
+    });
 
     function toggleDarkMode() {
         darkMode = !darkMode;
@@ -8,7 +17,7 @@
     }
 </script>
 
-<div class="page-wrapper">
+<div class="page-wrapper" class:entering={entering}>
 
     <div class="card">
 
