@@ -3,6 +3,7 @@
     import { goto } from '$app/navigation';
 
     let entering = true;
+    let leaving = false;
     let darkMode = false;
     let deviceId = "01D4TH879";
 
@@ -18,8 +19,11 @@
     }
 
     function handleHostClick() {
-        // navigate to chooseApp page
-        goto('/chooseApp');
+        leaving = true;
+
+        setTimeout(() => {
+            goto('/chooseApp');
+        }, 400);
     }
 </script>
 
@@ -40,7 +44,7 @@
         </div>
 
         <!-- Center Host / Join -->
-        <div class="session-wrapper">
+        <div class="session-wrapper" class:leaving={leaving}>
 
             <button class="session-button" on:click={handleHostClick}>
                 Host
