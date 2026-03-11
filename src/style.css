@@ -247,6 +247,7 @@ body.dark-mode .device-id {
     align-items: center;
     gap: 25px;
     margin-top: -19px;
+    margin-bottom: -1000px;
 
     opacity: 1;
     transition: transform 0.55s cubic-bezier(.22,.61,.36,1),
@@ -254,8 +255,7 @@ body.dark-mode .device-id {
 }
 
 /* start state */
-
-.page-wrapper.entering .session-wrapper {
+.host-join-page.page-wrapper.entering .session-wrapper {
     transform: translateY(-35%);
     opacity: 0;
 }
@@ -279,10 +279,10 @@ body.dark-mode .session-divider {
 
 
 /* ------------------------------
-   Bottom Profile
+   Bottom Profile - animate only on Host/Join page
 --------------------------------*/
 
-.profile-wrapper {
+.host-join-page .profile-wrapper {
     position: absolute;
     bottom: 40px;
     display: flex;
@@ -294,31 +294,125 @@ body.dark-mode .session-divider {
 }
 
 /* start position */
-
-.page-wrapper.entering .profile-wrapper {
+.host-join-page.page-wrapper.entering .profile-wrapper {
     transform: translateY(-220px) scale(0.6);
     opacity: 0.8;
 }
 
 /* avatar */
+.host-join-page .profile-avatar {
+    width: 55px;
+    border-radius: 50%;
+    margin-bottom: -7px;
+}
+
+/* text */
+.host-join-page .profile-name {
+    font-size: 13px;
+    
+}
+
+.host-join-page .profile-device {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-bottom: 28px;
+    color: #888;
+
+}
+
+body.dark-mode .host-join-page .profile-device {
+    color: #FAFAFA;
+}
+
+
+
+/* ------------------------------
+   App Grid - chooseApp Page
+-------------------------------- */
+.app-grid {
+    width: 200px;
+    height: 200px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    margin: 0 auto;
+    margin-top: 96px;
+}
+
+.app-box {
+    background-color: #212121;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: background-color 0.3s ease;
+}
+
+body.dark-mode .app-box {
+    background-color: #FAFAFA;
+}
+
+.app-box:hover {
+    background-color: #333333;
+}
+
+body.dark-mode .app-box:hover {
+    background-color: #e0e0e0;
+}
+
+.app-box svg {
+    width: 40px;
+    height: 40px;
+    color: #FAFAFA;
+}
+
+body.dark-mode .app-box svg {
+    color: #212121;
+}
+
+/* ------------------------------
+   Host Button - chooseApp Page
+-------------------------------- */
+.host-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.host-button {
+    width: 120px;
+    height: 40px;
+    border-radius: 25px;
+    font-size: 14px;
+}
+
+/* ------------------------------
+   Bottom Profile
+-------------------------------- */
+.profile-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    margin-bottom: 28px;
+}
 
 .profile-avatar {
     width: 55px;
     border-radius: 50%;
-    margin-bottom: 6px;
+    margin-bottom: -7px;
 }
 
-/* text */
-
 .profile-name {
-    font-size: 13px;
+font-size: 13px;
 }
 
 .profile-device {
     font-size: 11px;
     opacity: 0.8;
-}
-
-body.dark-mode .profile-device {
-    color: #FAFAFA;
+    margin-bottom: 28px;
+    color: #888;
 }

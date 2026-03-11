@@ -1,5 +1,6 @@
 <script>
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
 
     let entering = true;
     let darkMode = false;
@@ -15,9 +16,14 @@
         darkMode = !darkMode;
         document.body.classList.toggle("dark-mode", darkMode);
     }
+
+    function handleHostClick() {
+        // navigate to chooseApp page
+        goto('/chooseApp');
+    }
 </script>
 
-<div class="page-wrapper" class:entering={entering}>
+<div class="page-wrapper host-join-page" class:entering={entering}>
 
     <div class="card">
 
@@ -36,7 +42,7 @@
         <!-- Center Host / Join -->
         <div class="session-wrapper">
 
-            <button class="session-button">
+            <button class="session-button" on:click={handleHostClick}>
                 Host
             </button>
 
