@@ -324,6 +324,7 @@ body.dark-mode .host-join-page .profile-device {
     color: #FAFAFA;
 }
 
+
 /* Host / Join animation */
 
 .session-wrapper {
@@ -348,7 +349,7 @@ body.dark-mode .host-join-page .profile-device {
     grid-template-rows: 1fr 1fr;
     gap: 8px;
     margin: 0 auto;
-    margin-top: 96px;
+    margin-top: 115px;
 
     transform-origin: center;
 
@@ -402,6 +403,17 @@ body.dark-mode .app-box svg {
     margin-top: 10px;
 }
 
+.host-wrapperDROP {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+.host-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
 .host-button {
     width: 120px;
     height: 40px;
@@ -409,6 +421,13 @@ body.dark-mode .app-box svg {
     font-size: 14px;
 }
 
+.host-buttonDROP {
+    background-color: #FAFAFA;
+    width: 120px;
+    height: 40px;
+    border-radius: 25px;
+    font-size: 14px;
+}
 
 
 /* ------------------------------
@@ -418,7 +437,7 @@ body.dark-mode .app-box svg {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 50px;
+    margin-top: 81px;
     margin-bottom: 28px;
 }
 
@@ -449,7 +468,7 @@ font-size: 13px;
 
 .drop-zone {
     width: 300px;
-    height: 260px;
+    height: 212px;
     border: 2px solid #555;
     border-radius: 18px;
     margin-top: 70px;
@@ -507,5 +526,149 @@ body.dark-mode .folder-icon {
 /* Host spacing */
 
 .host-wrapper {
-    margin-top: 30px;
+    margin-top: 20px;
+}
+
+
+.profile-wrapperDrag {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    margin-bottom: 28px;
+}
+
+.profile-avatarDrag {
+    width: 55px;
+    border-radius: 50%;
+    margin-bottom: -7px;
+}
+
+.profile-nameDrag {
+font-size: 13px;
+}
+
+.profile-deviceDrag {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-bottom: 28px;
+    color: #888;
+}
+
+
+/* ------------------------------
+   Thumbnail Card
+-------------------------------- */
+
+.ytCard .thumbnail-card {
+    width: 350px;
+    height: 212px;
+    border: 2px solid #555;
+    border-radius: 18px;
+    margin-top: 70px;
+    overflow: hidden;
+
+    transition: transform 0.35s cubic-bezier(.22,.61,.36,1),
+                opacity 0.15s ease,
+                border-color 0.15s ease;
+
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* entering animation */
+
+.page-wrapper.entering .thumbnail-card {
+    transform: scale(0.4);
+    opacity: 0;
+}
+
+.ytCard .thumbnail-card:hover {
+    border-color: #212121;
+}
+
+body.dark-mode .ytCard .thumbnail-card {
+    border-color: #aaa;
+}
+
+
+/* Thumbnail image */
+
+.thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* Youtube Title */
+
+.yt-title {
+    margin-top: 10px;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+
+/* Views + Date */
+
+.yt-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 6px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.yt-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.meta-icon {
+    width: 14px;
+    height: 14px;
+}
+
+
+/* Host spacing */
+
+.host-wrapper {
+    margin-top: 20px;
+}
+
+
+/* Profile */
+
+.host-wrapper {
+    margin-top: 20px;
+}
+
+
+.profile-wrapperYT {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    margin-bottom: 28px;
+}
+
+.profile-avatarYT {
+    width: 55px;
+    border-radius: 50%;
+    margin-bottom: -7px;
+}
+
+.profile-nameYT {
+font-size: 13px;
+}
+
+.profile-deviceYT {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-bottom: 28px;
+    color: #888;
 }

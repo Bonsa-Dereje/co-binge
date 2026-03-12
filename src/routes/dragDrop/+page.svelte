@@ -16,15 +16,7 @@
         document.body.classList.toggle("dark-mode", darkMode);
     }
 
-    function handleDrop(e) {
-        e.preventDefault();
-        const files = e.dataTransfer.files;
-        console.log("Dropped files:", files);
-    }
 
-    function allowDrop(e) {
-        e.preventDefault();
-    }
 </script>
 
 <div class="page-wrapper" class:entering={entering}>
@@ -67,10 +59,10 @@
         </div>
 
         <!-- Profile -->
-        <div class="profile-wrapper">
+        <div class="profile-wrapperDrag">
             <img src="/avatars/girlAvatar.png" alt="avatar" class="profile-avatar"/>
-            <div class="profile-name">user name</div>
-            <div class="profile-device">device id: {deviceId}</div>
+            <div class="profile-nameDrag">user name</div>
+            <div class="profile-deviceDrag">device id: {deviceId}</div>
         </div>
 
     </div>
