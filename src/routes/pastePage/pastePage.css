@@ -1,0 +1,68 @@
+/* ------------------------------
+   Universal Font
+-------------------------------- */
+@font-face {
+    font-family: "DM Mono";
+    src: url("/fonts/DMMono-Regular.ttf") format("ttf");
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* ------------------------------
+   Light Mode
+-------------------------------- */
+body {
+    margin: 0;
+    font-family: "DM Mono", monospace;
+    background-color: #FAFAFA;
+    color: #212121;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #FAFAFA;
+}
+
+/* ------------------------------
+   Page Wrapper
+-------------------------------- */
+.page-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100vw;
+}
+
+/* ------------------------------
+   Paste Button (center icon)
+-------------------------------- */
+.paste-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, color 0.2s ease;
+    color: #212121;
+}
+
+body.dark-mode .paste-button {
+    color: #FAFAFA;
+}
+
+.paste-button svg {
+    width: 80px;
+    height: 80px;
+}
+
+.paste-button:hover {
+    transform: scale(1.1);
+}
+
+.paste-button:active {
+    transform: scale(0.95);
+}

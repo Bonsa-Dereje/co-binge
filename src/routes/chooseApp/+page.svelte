@@ -46,20 +46,21 @@
         <!-- 2x2 App Grid -->
         <div class="app-grid" class:leaving={leaving}>
 
-            <button class="app-box" aria-label="Traffic Cone" on:click={() => handleAppClick('/dragDrop')}>
+            <!-- Folder -->
+            <button class="app-box" aria-label="Folder" on:click={() => handleAppClick('/dragDrop')}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M12 2L2 22h20L12 2z"/>
-                    <path d="M12 6l-6 12h12l-6-12z"/>
-                    <line x1="12" y1="10" x2="12" y2="14"/>
-                    <line x1="10" y1="16" x2="14" y2="16"/>
+                    <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
                 </svg>
             </button>
 
-            <button class="app-box" aria-label="YouTube Card" on:click={() => handleAppClick('/youtubeCard')}>                <svg viewBox="0 0 24 24" fill="currentColor">
+            <!-- YouTube -->
+            <button class="app-box" aria-label="YouTube Card" on:click={() => handleAppClick('/pastePage')}>
+                <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
             </button>
 
+            <!-- Browser -->
             <button class="app-box" aria-label="Globe" on:click={() => handleAppClick('/browser')}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <circle cx="12" cy="12" r="10"/>
@@ -70,6 +71,7 @@
                 </svg>
             </button>
 
+            <!-- Netflix -->
             <button class="app-box" aria-label="Netflix" on:click={() => handleAppClick('/netflix')}>
                 <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24zm8.489 0v9.63L18.6 22.951c-.043-7.86-.004-15.913.002-22.95zM5.398 1.05V24c1.873-.225 2.81-.312 4.715-.398v-9.22z"/>
@@ -77,7 +79,6 @@
             </button>
 
         </div>
-
 
         <!-- Bottom Profile -->
         <div class="profile-wrapper">
