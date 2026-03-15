@@ -22,7 +22,7 @@
         leaving = true;
 
         setTimeout(() => {
-            goto('/youtubeCard');
+            goto('/movieCard');
         }, 400);
     }
 </script>
