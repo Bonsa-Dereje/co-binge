@@ -38,8 +38,7 @@
         <!-- Drag Drop Box -->
         <div
             class="drop-zone"
-            on:drop={handleDrop}
-            on:dragover={allowDrop}
+
         >
 
             <svg viewBox="0 0 24 24" class="folder-icon">
@@ -69,4 +68,4 @@
 
 </div>
 
-<style src="./dragDrop.css"></style>
+<style src="../style.css"></style>

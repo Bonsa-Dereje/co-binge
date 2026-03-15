@@ -61,7 +61,7 @@
             </button>
 
             <!-- Browser -->
-            <button class="app-box" aria-label="Globe" on:click={() => handleAppClick('/browser')}>
+            <button class="app-box" aria-label="Globe" on:click={() => handleAppClick('/pastePage')}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <circle cx="12" cy="12" r="10"/>
                     <ellipse cx="12" cy="12" rx="4" ry="10"/>
