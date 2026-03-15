@@ -1,0 +1,70 @@
+/* Page Layout */
+
+.page-wrapperNF{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+    
+
+    
+}
+
+
+/* Warning Box */
+
+.warning-wrapperNF{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 14px;
+
+    text-align: center;
+
+    margin-bottom: 75px;
+}
+
+
+/* Warning Icon */
+
+.warning-iconNF{
+    font-size: 48px;
+}
+
+
+/* Text */
+
+.warning-textNF{
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.warning-subtextNF{
+    font-size: 13px;
+    color: #888;
+}
+
+
+/* Github Link */
+
+.repo-linkNF{
+    margin-top: -13px;
+
+    border: none;
+    background: none;
+
+    font-size: 13px;
+
+    color: #4da3ff;
+
+    cursor: pointer;
+}
+
+.repo-linkNF:hover{
+    text-decoration: underline;
+}

@@ -15,7 +15,8 @@
         "title": "coBinge",
         "width": 400,
         "height": 600,
-        "resizable": true,
+        "resizable": false,
+        "maximizable": false,
         "fullscreen": false
       }
     ],

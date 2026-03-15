@@ -26,42 +26,41 @@
     }
 </script>
 
-<div class="page-wrapper" class:entering={entering}>
+<div class="page-wrapperMC" class:entering={entering}>
 
-    <!-- TOP TOGGLE -->
+    <!-- DARK MODE TOGGLE -->
     <div class="toggle-wrapperMC">
         <button
-            class="toggle"
+            class="toggleMC"
             class:active={darkMode}
             on:click={toggleDarkMode}
-            aria-label="Toggle dark mode"
         >
-            <div class="toggle-circle"></div>
+            <div class="toggle-circleMC"></div>
         </button>
     </div>
 
-    <!-- CENTER MOVIE CARD -->
-    <div class="movie-card">
+    <!-- MOVIE CARD -->
+    <div class="movie-cardMC">
 
-        <div class="poster-wrapper">
-            <img src={movie.poster} alt="movie poster" class="poster-img">
+        <div class="poster-wrapperMC">
+            <img src={movie.poster} alt="movie poster" class="poster-imgMC">
         </div>
 
-        <div class="movie-info">
+        <div class="movie-infoMC">
 
-            <div class="movie-title">
+            <div class="movie-titleMC">
                 {movie.title}
             </div>
 
-            <div class="movie-meta">
+            <div class="movie-metaMC">
                 {movie.rating} • {movie.date}
             </div>
 
-            <div class="movie-description">
+            <div class="movie-descriptionMC">
                 {movie.description}
             </div>
 
-            <button class="movieHost">
+            <button class="movieHostMC">
                 Host
             </button>
 
@@ -69,7 +68,7 @@
 
     </div>
 
-    <!-- BOTTOM PROFILE -->
+    <!-- PROFILE -->
     <div class="profile-wrapperMC">
 
         <img
