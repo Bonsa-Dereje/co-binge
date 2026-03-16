@@ -113,12 +113,13 @@
 .movie-descriptionMC{
     font-size: 11px;
     line-height: 1.4;
+    
 }
 
 /* Host Button */
 
 .movieHostMC{
-    width: 120px;
+    width: 140px;
     height: 38px;
     border-radius: 25px;
     border: none;
