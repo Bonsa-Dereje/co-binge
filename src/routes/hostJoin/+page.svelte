@@ -25,6 +25,14 @@
             goto('/chooseApp');
         }, 400);
     }
+
+    function handleJoinClick() {
+        leaving = true;
+
+        setTimeout(() => {
+            goto('/pastePR_ID');
+        }, 400);
+    }    
 </script>
 
 <div class="page-wrapper host-join-page" class:entering={entering}>
@@ -52,7 +60,7 @@
 
             <div class="session-divider"></div>
 
-            <button class="session-button">
+            <button class="session-button"on:click={handleJoinClick}> 
                 Join
             </button>
 

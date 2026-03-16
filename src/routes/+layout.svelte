@@ -14,7 +14,7 @@
 	}
 
 	function goGroups() {
-		goto('/groups');
+		goto('/groupsList');
 	}
 </script>
 

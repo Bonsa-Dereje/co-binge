@@ -1,0 +1,180 @@
+/* -------------------------
+   Title
+-------------------------*/
+
+.groups-title{
+    margin-top: 40px;
+    margin-bottom: 20px;
+
+    font-size: 18px;
+}
+
+
+/* -------------------------
+   Groups list
+-------------------------*/
+
+.groups-wrapper{
+    align-items: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+
+/* group card */
+
+.group-card{
+    width: 300px;
+    height: 44px;
+
+    background: #212121;
+    border-radius: 25px;
+
+    color: #FAFAFA;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 18px;
+
+    /* NEW ANIMATION */
+    opacity: 0;
+    transform: translateY(-40px) scale(0.95);
+    animation: dropCard 0.6s cubic-bezier(.21,1.02,.73,1) forwards;
+}
+
+/* stagger animation */
+
+.group-card:nth-child(1){ animation-delay: 0.1s; }
+.group-card:nth-child(2){ animation-delay: 0.2s; }
+.group-card:nth-child(3){ animation-delay: 0.3s; }
+.group-card:nth-child(4){ animation-delay: 0.4s; }
+.group-card:nth-child(5){ animation-delay: 0.5s; }
+.group-card:nth-child(6){ animation-delay: 0.6s; }
+
+
+/* group name */
+
+.group-name{
+    font-size: 12px;
+}
+
+
+/* RIGHT SIDE WRAPPER */
+
+.group-right{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 140px;
+    margin-right: 30px;
+    
+}
+
+
+/* members count */
+
+.group-members{
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+
+/* green dot */
+
+.member-dot{
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00c853;
+}
+
+
+/* avatars */
+
+.group-avatars{
+    display: flex;
+    margin-right: 80px;
+}
+
+.group-avatar{
+    width: 22px;
+    height: 22px;
+
+    border-radius: 50%;
+
+    border: 2px solid #212121;
+
+    margin-left: -6px;
+}
+
+
+/* -------------------------
+   Create button
+-------------------------*/
+
+.create-button{
+    margin-top: 88px;
+    margin-bottom: -50px;
+
+    width: 140px;
+
+    border-radius: 25px;
+
+    /* NEW ANIMATION */
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    animation: fadeButton 1s ease forwards;
+    animation-delay: 0.05s;
+}
+
+
+
+/* -------------------------
+   Animations
+-------------------------*/
+
+/* falling cards animation */
+
+@keyframes dropCard{
+    0%{
+        opacity:0;
+        transform: translateY(-40px) scale(0.95);
+    }
+
+    60%{
+        opacity:1;
+        transform: translateY(6px) scale(1.02);
+    }
+
+    100%{
+        opacity:1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* create button fade animation */
+
+@keyframes fadeButton{
+    0%{
+        opacity:0;
+        transform: translateY(20px) scale(0.9);
+    }
+
+    60%{
+        opacity:1;
+        transform: translateY(-4px) scale(1.05);
+    }
+
+    100%{
+        opacity:1;
+        transform: translateY(0) scale(1);
+    }
+}
