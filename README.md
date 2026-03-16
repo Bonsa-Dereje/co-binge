@@ -8,14 +8,6 @@ Co-Binge recreates the experience of navigating a streaming service while mainta
 
 ---
 
-# Preview
-
-<img width="100%" alt="preview" src="docs/preview.png">
-
-*(Replace with screenshots from your application)*
-
----
-
 # Tech Stack
 
 ## Core Technologies
@@ -35,6 +27,11 @@ Co-Binge recreates the experience of navigating a streaming service while mainta
 
 ---
 
+# Preview
+
+<img width="100%" alt="preview" src="docs/preview.png">
+
+---
 ## Runtime & Platform
 
 <p>
