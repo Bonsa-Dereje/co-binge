@@ -1,42 +1,169 @@
-# sv
+# Co-Binge
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A minimal, modern movie-browsing interface built with **SvelteKit** and designed to feel like a lightweight streaming platform UI.
 
-## Creating a project
+The project focuses on **smooth transitions, responsive layouts, and a clean viewing experience** while exploring modern web and desktop tooling.
 
-If you're seeing this, you've probably already done this step. Congrats!
+Co-Binge recreates the experience of navigating a streaming service while maintaining a **small, readable, and modular codebase**.
 
-```sh
-# create a new project
-npx sv create my-app
+---
+
+# Preview
+
+<img width="100%" alt="preview" src="docs/preview.png">
+
+*(Replace with screenshots from your application)*
+
+---
+
+# Tech Stack
+
+## Core Technologies
+
+<p>
+<img src="https://skillicons.dev/icons?i=svelte,js,html,css,rust" />
+</p>
+
+| Technology     | Description                                           |
+| -------------- | ----------------------------------------------------- |
+| **SvelteKit**  | Full-stack framework used to build the UI and routing |
+| **Svelte**     | Reactive UI framework powering the components         |
+| **JavaScript** | Application logic                                     |
+| **HTML5**      | Page structure and semantic layout                    |
+| **CSS3**       | Styling and responsive design                         |
+| **Rust**       | Native backend layer used through Tauri               |
+
+---
+
+## Runtime & Platform
+
+<p>
+<img src="https://skillicons.dev/icons?i=nodejs,tauri" />
+</p>
+
+| Tool        | Purpose                                               |
+| ----------- | ----------------------------------------------------- |
+| **Node.js** | Development runtime                                   |
+| **Tauri**   | Desktop app framework for packaging the app with Rust |
+
+---
+
+## Development Tools
+
+<p>
+<img src="https://skillicons.dev/icons?i=git,github,vscode" />
+</p>
+
+| Tool        | Purpose                         |
+| ----------- | ------------------------------- |
+| **Git**     | Version control                 |
+| **GitHub**  | Code hosting                    |
+| **VS Code** | Primary development environment |
+
+---
+
+# Features
+
+* Smooth page transitions
+* Dark mode toggle
+* Streaming-style interface
+* Responsive layout
+* Modular Svelte components
+* Custom movie card UI
+* Device identifier display
+* Back navigation system
+* Lightweight frontend architecture
+
+---
+
+# Project Structure
+
+```
+co-binge
+│
+├── src
+│   ├── routes
+│   │   ├── +layout.svelte
+│   │   ├── +page.svelte
+│   │
+│   ├── lib
+│   │   ├── assets
+│   │   ├── components
+│   │
+│   └── style.css
+│
+├── static
+│
+├── src-tauri
+│   └── Rust backend
+│
+├── package.json
+└── README.md
 ```
 
-To recreate this project with the same configuration:
+---
 
-```sh
-# recreate this project
-npx sv@0.12.5 create --template minimal --types jsdoc --install npm .
+# Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/yourusername/co-binge.git
 ```
 
-## Developing
+Navigate into the project
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+```bash
+cd co-binge
+```
 
-```sh
+Install dependencies
+
+```bash
+npm install
+```
+
+Run the development server
+
+```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Open the app in your browser
 
-To create a production version of your app:
+```
+http://localhost:5173
+```
 
-```sh
+---
+
+# Running as a Desktop App (Tauri)
+
+Install Tauri dependencies and run:
+
+```bash
+npm run tauri dev
+```
+
+This launches the application as a **native desktop app powered by Rust**.
+
+---
+
+# Build for Production
+
+Build the web application
+
+```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+Preview the production build
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```bash
+npm run preview
+---
+
+# License
+
+MIT License
+
