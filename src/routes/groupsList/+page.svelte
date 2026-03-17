@@ -29,9 +29,14 @@
     }
 
     function openGroup(group: Group) {
-        console.log("Open group:", group.name);
+        
         goto('/groupsPage'); // Svelte way navigation
     }
+
+function goToCreateGroup() {
+    goto('/createGroup');
+}
+
 </script>
 
 <div class="page-wrapper groups-page" class:entering={entering}>
@@ -86,7 +91,7 @@
         </div>
 
         <!-- Create Button -->
-        <button class="create-button">
+        <button class="create-button" on:click={goToCreateGroup}>
             Create
         </button>
 

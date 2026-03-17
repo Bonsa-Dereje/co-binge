@@ -1,0 +1,58 @@
+/* -------------------------
+   Join input area
+-------------------------*/
+
+.join-wrapper{
+    margin-top: 190px;
+    margin-bottom: 35px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* group id input */
+
+.group-input{
+    width: 200px;
+
+    border: none;
+    border-bottom: 1px solid #212121;
+
+    background: transparent;
+
+    font-family: "DM Mono", monospace;
+    font-size: 13px;
+
+    text-align: center;
+
+    padding: 6px;
+    margin-bottom: 16px;
+}
+
+.group-input:focus{
+    outline: none;
+}
+
+body.dark-mode .group-input{
+    border-bottom: 1px solid #FAFAFA;
+}
+
+
+/* join button */
+
+.create-group{
+    width: 150px;
+    border-radius: 25px;
+
+    
+
+    margin-bottom: 11px;
+    background: #212121;
+}
+
+.join-button:hover{
+    opacity: 0.7;
+}
+
