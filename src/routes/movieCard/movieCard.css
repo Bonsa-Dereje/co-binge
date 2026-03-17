@@ -17,8 +17,8 @@
 
 .toggle-wrapperMC{
     position: relative;
-    margin-top: 28px;
-    margin-bottom: 50px;
+    margin-top: 38px;
+    margin-bottom: 35px;
 }
 
 .toggleMC{
@@ -149,7 +149,7 @@ body.dark-mode .movieHostMC{
     flex-direction: column;
     align-items: center;
 
-    margin-top: 35px;
+    margin-top: 40px;
     margin-bottom: 212px;
 }
 

@@ -1,10 +1,8 @@
 # Co-Binge
 
-A minimal, modern movie-browsing interface built with **SvelteKit** and designed to feel like a lightweight streaming platform UI.
+Co-Binge is a desktop application that allows users to watch any form of media together in real time. It automatically synchronizes playback across devices, intelligently handling pauses, buffering, and network delays to keep everyone perfectly in sync.
 
-The project focuses on **smooth transitions, responsive layouts, and a clean viewing experience** while exploring modern web and desktop tooling.
-
-Co-Binge recreates the experience of navigating a streaming service while maintaining a **small, readable, and modular codebase**.
+The platform also includes a live chat system with sticker support, creating a shared and interactive viewing experience that feels seamless and connected regardless of location.
 
 ---
 
@@ -158,6 +156,8 @@ Preview the production build
 
 ```bash
 npm run preview
+```
+
 ---
 
 # License

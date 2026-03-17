@@ -1,3 +1,14 @@
+.group-card {
+    all: unset; /* removes default button styles */
+    display: flex;
+    width: 100%;
+    cursor: pointer;
+}
+
+.group-card:active {
+    transform: scale(0.98);
+}
+
 /* -------------------------
    Title
 -------------------------*/

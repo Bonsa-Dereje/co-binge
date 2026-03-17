@@ -21,6 +21,12 @@
         darkMode = !darkMode;
         document.body.classList.toggle("dark-mode", darkMode);
     }
+
+    function openGroup(group) {
+        console.log("Opening group:", group.name);
+        // later you can route:
+        // goto(`/group/${group.name}`);
+    }
 </script>
 
 <div class="page-wrapper groups-page" class:entering={entering}>
@@ -48,7 +54,7 @@
         <div class="groups-wrapper">
 
             {#each groups as group}
-                <div class="group-card">
+                <button class="group-card" on:click={() => openGroup(group)}>
 
                     <div class="group-name">
                         {group.name}
@@ -69,7 +75,7 @@
 
                     </div>
 
-                </div>
+                </button>
             {/each}
 
         </div>
