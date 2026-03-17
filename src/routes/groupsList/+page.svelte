@@ -1,11 +1,16 @@
-<script>
+<script lang="ts">
     import { onMount } from 'svelte';
 
     let entering = true;
     let darkMode = false;
     let deviceId = "01D4TH879";
 
-    const groups = [
+    type Group = {
+        name: string;
+        members: number;
+    };
+
+    const groups: Group[] = [
         { name: "blueParty05D", members: 2 },
         { name: "theDoodes", members: 5 },
         { name: "crocs", members: 5 }
@@ -22,10 +27,9 @@
         document.body.classList.toggle("dark-mode", darkMode);
     }
 
-    function openGroup(group) {
-        console.log("Opening group:", group.name);
-        // later you can route:
-        // goto(`/group/${group.name}`);
+    function openGroup(group: Group) {
+        console.log("Open group:", group.name);
+        // navigation or logic here
     }
 </script>
 

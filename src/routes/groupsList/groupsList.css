@@ -1,10 +1,9 @@
 .group-card {
-    all: unset; /* removes default button styles */
+    all: unset;
     display: flex;
     width: 100%;
     cursor: pointer;
 }
-
 .group-card:active {
     transform: scale(0.98);
 }
