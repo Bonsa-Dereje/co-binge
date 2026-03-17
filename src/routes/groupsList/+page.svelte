@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
 
     let entering = true;
     let darkMode = false;
@@ -29,7 +30,7 @@
 
     function openGroup(group: Group) {
         console.log("Open group:", group.name);
-        // navigation or logic here
+        goto('/groupsPage'); // Svelte way navigation
     }
 </script>
 
