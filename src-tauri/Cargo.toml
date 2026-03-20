@@ -26,3 +26,5 @@ tauri-plugin-log = "2"
 
 # Added for persistent device ID generation
 uuid = { version = "1", features = ["v4"] }
+
+rand = "0.8"
