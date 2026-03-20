@@ -1,16 +1,31 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
+    import { globalUserName, globalDeviceId } from '$lib/stores/user';
 
     let entering = true;
     let darkMode = false;
-    let deviceId = "01D4TH879";
-
+    let username = '';   // loaded from global store
+    let deviceId = '';   // loaded from global store
     let thumbnail = "/thumbnails/maxresdefault.jpg";
 
     onMount(() => {
         requestAnimationFrame(() => {
             entering = false;
         });
+
+        // Subscribe to global stores
+        const unsubscribeUser = globalUserName.subscribe(value => {
+            username = value || 'user name';
+        });
+        const unsubscribeDevice = globalDeviceId.subscribe(value => {
+            deviceId = value || '01D4TH879';
+        });
+
+        // Optional: cleanup subscriptions when component unmounts
+        return () => {
+            unsubscribeUser();
+            unsubscribeDevice();
+        };
     });
 
     function toggleDarkMode() {
@@ -78,7 +93,7 @@
         <!-- Profile -->
         <div class="profile-wrapperYT">
             <img src="/avatars/girlAvatar.png" alt="avatar" class="profile-avatarDrag"/>
-            <div class="profile-nameYT">user name</div>
+            <div class="profile-nameYT">{username}</div>
             <div class="profile-deviceYT">device id: {deviceId}</div>
         </div>
 

@@ -1,15 +1,25 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
+    import { globalUserName, globalDeviceId } from '$lib/stores/user';
 
     let entering = true;
     let leaving = false;
     let darkMode = false;
-    let deviceId = "01D4TH879";
+    let username = '';   // loaded from global store
+    let deviceId = '';   // loaded from global store
 
     onMount(() => {
         requestAnimationFrame(() => {
             entering = false;
+        });
+
+        // Subscribe to global stores
+        globalUserName.subscribe(value => {
+            username = value || 'user name';
+        });
+        globalDeviceId.subscribe(value => {
+            deviceId = value || '01D4TH879';
         });
     });
 
@@ -83,7 +93,7 @@
         <!-- Bottom Profile -->
         <div class="profile-wrapper">
             <img src="/avatars/girlAvatar.png" alt="avatar" class="profile-avatar"/>
-            <div class="profile-name">user name</div>
+            <div class="profile-name">{username}</div>
             <div class="profile-device">device id: {deviceId}</div>
         </div>
 

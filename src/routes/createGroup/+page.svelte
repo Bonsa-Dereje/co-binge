@@ -1,15 +1,31 @@
-<script>
+<script lang="ts">
     import { onMount } from 'svelte';
+    import { globalUserName, globalDeviceId } from '$lib/stores/user';
 
     let entering = true;
     let darkMode = false;
-    let deviceId = "01D4TH879";
+    let username = '';   // loaded from global store
+    let deviceId = '';   // loaded from global store
     let groupId = "";
 
     onMount(() => {
         requestAnimationFrame(() => {
             entering = false;
         });
+
+        // Subscribe to global stores
+        const unsubscribeUser = globalUserName.subscribe(value => {
+            username = value || 'user name';
+        });
+        const unsubscribeDevice = globalDeviceId.subscribe(value => {
+            deviceId = value || '01D4TH879';
+        });
+
+        // Cleanup subscriptions when component unmounts
+        return () => {
+            unsubscribeUser();
+            unsubscribeDevice();
+        };
     });
 
     function toggleDarkMode() {
@@ -63,7 +79,7 @@
             />
 
             <div class="profile-name">
-                user name
+                {username}
             </div>
 
             <div class="profile-device">
@@ -76,5 +92,4 @@
 
 </div>
 
-
-<style src="./pastePR_ID.css"></style>
+<style src="./createGroup.css"></style>

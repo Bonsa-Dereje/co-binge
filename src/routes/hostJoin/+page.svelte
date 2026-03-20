@@ -1,38 +1,46 @@
-<script>
-    import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
+<script lang="ts">
+import { onMount } from 'svelte';
+import { goto } from '$app/navigation';
+import { globalUserName, globalDeviceId } from '$lib/stores/user';
 
-    let entering = true;
-    let leaving = false;
-    let darkMode = false;
-    let deviceId = "01D4TH879";
+let entering = true;
+let leaving = false;
+let darkMode = false;
+let username = '';   // loaded from global store
+let deviceId = '';   // loaded from global store
 
-    onMount(() => {
-        requestAnimationFrame(() => {
-            entering = false;
-        });
+onMount(() => {
+    requestAnimationFrame(() => {
+        entering = false;
     });
 
-    function toggleDarkMode() {
-        darkMode = !darkMode;
-        document.body.classList.toggle("dark-mode", darkMode);
-    }
+    // Subscribe to global stores
+    globalUserName.subscribe(value => {
+        username = value || 'user name';
+    });
+    globalDeviceId.subscribe(value => {
+        deviceId = value || 'Loading...';
+    });
+});
 
-    function handleHostClick() {
-        leaving = true;
+function toggleDarkMode() {
+    darkMode = !darkMode;
+    document.body.classList.toggle("dark-mode", darkMode);
+}
 
-        setTimeout(() => {
-            goto('/chooseApp');
-        }, 400);
-    }
+function handleHostClick() {
+    leaving = true;
+    setTimeout(() => {
+        goto('/chooseApp');
+    }, 400);
+}
 
-    function handleJoinClick() {
-        leaving = true;
-
-        setTimeout(() => {
-            goto('/pastePR_ID');
-        }, 400);
-    }    
+function handleJoinClick() {
+    leaving = true;
+    setTimeout(() => {
+        goto('/pastePR_ID');
+    }, 400);
+}
 </script>
 
 <div class="page-wrapper host-join-page" class:entering={entering}>
@@ -60,7 +68,7 @@
 
             <div class="session-divider"></div>
 
-            <button class="session-button"on:click={handleJoinClick}> 
+            <button class="session-button" on:click={handleJoinClick}> 
                 Join
             </button>
 
@@ -76,7 +84,7 @@
             />
 
             <div class="profile-name">
-                user name
+                {username}
             </div>
 
             <div class="profile-device">
