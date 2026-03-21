@@ -1,7 +1,9 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
     import { globalUserName, globalDeviceId } from '$lib/stores/user';
+    import { isVideoStore } from '$lib/stores/isVideo';
     import { listen } from "@tauri-apps/api/event";
+    import { fade, fly } from 'svelte/transition';
 
     let entering = true;
     let darkMode = false;
@@ -10,8 +12,16 @@
 
     let dragging = false;
 
+    let isVideo = true;
+
+    // ✅ NEW
+    let showModal = false;
+    let hasInitialized = false;
+    let modalTimeout: any;
+
     let unsubscribeUser: () => void;
     let unsubscribeDevice: () => void;
+    let unsubscribeVideo: () => void;
 
     let unlistenEnter: () => void;
     let unlistenOver: () => void;
@@ -23,7 +33,6 @@
             entering = false;
         });
 
-        // Store subscriptions
         unsubscribeUser = globalUserName.subscribe(value => {
             username = value || 'user name';
         });
@@ -32,30 +41,38 @@
             deviceId = value || '01D4TH879';
         });
 
-        // Prevent browser default (important in dev mode)
+        // ✅ UPDATED VIDEO SUBSCRIBE LOGIC
+        unsubscribeVideo = isVideoStore.subscribe(value => {
+            if (!hasInitialized) {
+                // skip first value
+                isVideo = value;
+                hasInitialized = true;
+                return;
+            }
+
+            // only react AFTER initialization
+            if (value === false) {
+                triggerModal();
+            }
+
+            isVideo = value;
+        });
+
         window.addEventListener("dragover", preventDefault);
         window.addEventListener("drop", preventDefault);
 
-        // =========================
-        // ✅ TAURI DRAG EVENTS
-        // =========================
-
-        // Drag Enter
         unlistenEnter = await listen("tauri://drag-enter", () => {
             dragging = true;
         });
 
-        // Drag Over (not always needed, but good for consistency)
         unlistenOver = await listen("tauri://drag-over", () => {
             dragging = true;
         });
 
-        // Drag Leave
         unlistenLeave = await listen("tauri://drag-leave", () => {
             dragging = false;
         });
 
-        // ✅ DROP EVENT (THIS IS THE IMPORTANT ONE)
         unlistenDrop = await listen<string[]>("tauri://drag-drop", (event) => {
             dragging = false;
 
@@ -63,15 +80,18 @@
             if (!files || files.length === 0) return;
 
             const filePath = files[0];
-            console.log("Tauri file dropped:", filePath);
-
             handleFile(filePath);
+        });
+
+        await listen<boolean>('file:isVideo', (event) => {
+            isVideoStore.set(event.payload);
         });
     });
 
     onDestroy(() => {
         unsubscribeUser && unsubscribeUser();
         unsubscribeDevice && unsubscribeDevice();
+        unsubscribeVideo && unsubscribeVideo();
 
         unlistenEnter && unlistenEnter();
         unlistenOver && unlistenOver();
@@ -80,6 +100,8 @@
 
         window.removeEventListener("dragover", preventDefault);
         window.removeEventListener("drop", preventDefault);
+
+        clearTimeout(modalTimeout);
     });
 
     function preventDefault(e: DragEvent) {
@@ -92,7 +114,32 @@
     }
 
     // =========================
-    // DEV (BROWSER) DRAG SUPPORT
+    // ✅ MODAL CONTROL
+    // =========================
+
+    function triggerModal() {
+        showModal = true;
+
+        clearTimeout(modalTimeout);
+        modalTimeout = setTimeout(() => {
+            showModal = false;
+        }, 3000);
+    }
+
+    function closeModal() {
+        showModal = false;
+        clearTimeout(modalTimeout);
+    }
+
+    function handleOverlayClick(e: MouseEvent) {
+        // only close if clicking OUTSIDE modal
+        if ((e.target as HTMLElement).classList.contains('video-error-overlay')) {
+            closeModal();
+        }
+    }
+
+    // =========================
+    // DEV DRAG SUPPORT
     // =========================
 
     function handleDragEnter(e: DragEvent) {
@@ -117,14 +164,8 @@
         if (!files || files.length === 0) return;
 
         const file = files[0];
-        console.log("Browser file dropped:", file.name);
-
         handleFile(file);
     }
-
-    // =========================
-    // ✅ UNIFIED FILE HANDLER
-    // =========================
 
     function handleFile(file: any) {
         if (typeof file === "string") {
@@ -132,9 +173,6 @@
         } else {
             console.log("Handling browser file:", file.name);
         }
-
-        // TODO:
-        // upload to supabase / preview / start session
     }
 </script>
 
@@ -153,7 +191,7 @@
             </button>
         </div>
 
-        <!-- Drag Drop Box -->
+        <!-- Drag Drop -->
         <div
             class="drop-zone"
             class:dragging={dragging}
@@ -178,7 +216,7 @@
             </div>
         </div>
 
-        <!-- Host Button -->
+        <!-- Host -->
         <div class="host-wrapper">
             <button class="host-button">Host</button>
         </div>
@@ -192,5 +230,20 @@
 
     </div>
 </div>
+
+<!-- ✅ UPDATED MODAL -->
+{#if showModal}
+    <div 
+        class="video-error-overlay" 
+        on:click={handleOverlayClick}
+        in:fade 
+        out:fade
+    >
+        <div class="video-error-modal" in:fly={{ y: 40, duration: 200 }}>
+            <h2>Unsupported File</h2>
+            <p>Please drop a valid video file.</p>
+        </div>
+    </div>
+{/if}
 
 <style src="./dragDrop.css"></style>

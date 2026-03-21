@@ -4,6 +4,9 @@ use rand::distributions::Alphanumeric;
 use std::fs;
 use std::path::PathBuf;
 
+// Common video file extensions
+const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
+
 #[command]
 fn get_device_id(app_handle: tauri::AppHandle) -> String {
     let mut path: PathBuf = app_handle
@@ -35,16 +38,24 @@ pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
-
-            // ✅ CLONE for closure
             let window_clone = window.clone();
 
             window.on_window_event(move |event| {
                 if let WindowEvent::DragDrop(event) = event {
-                    println!("Drag event: {:?}", event);
-
                     if let tauri::DragDropEvent::Drop { paths, .. } = event {
-                        let _ = window_clone.emit("custom://file-drop", paths);
+                        // Check if any file is a video
+                        let is_video = paths.iter().any(|path| {
+                            if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                                VIDEO_EXTENSIONS.contains(&ext.to_lowercase().as_str())
+                            } else {
+                                false
+                            }
+                        });
+
+                        println!("Is video? {}", is_video);
+
+                        // Emit boolean to frontend
+                        let _ = window_clone.emit("file:isVideo", is_video);
                     }
                 }
             });
