@@ -3,15 +3,18 @@
   "productName": "coBinge",
   "version": "0.1.0",
   "identifier": "com.bonsa.cobinge",
+
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },
+
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "coBinge",
         "width": 400,
         "height": 620,
@@ -24,6 +27,7 @@
       "csp": null
     }
   },
+
   "bundle": {
     "active": true,
     "icon": [
@@ -33,5 +37,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  }
+  },
+
+  "plugins": {}
 }
