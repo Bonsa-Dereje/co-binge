@@ -3,7 +3,6 @@
     import { globalUserName, globalDeviceId } from '$lib/stores/user';
     import { isVideoStore } from '$lib/stores/isVideo';
     import { listen } from "@tauri-apps/api/event";
-    import { fade, fly } from 'svelte/transition';
 
     let entering = true;
     let darkMode = false;
@@ -11,13 +10,13 @@
     let deviceId = '';
 
     let dragging = false;
-
     let isVideo = true;
 
-    // ✅ NEW
-    let showModal = false;
+    // ✅ NEW TEXT STATE
+    let dropMessage = "drag and drop";
+    let isError = false;
+
     let hasInitialized = false;
-    let modalTimeout: any;
 
     let unsubscribeUser: () => void;
     let unsubscribeDevice: () => void;
@@ -41,18 +40,22 @@
             deviceId = value || '01D4TH879';
         });
 
-        // ✅ UPDATED VIDEO SUBSCRIBE LOGIC
+        // ✅ UPDATED VIDEO CHECK
         unsubscribeVideo = isVideoStore.subscribe(value => {
             if (!hasInitialized) {
-                // skip first value
                 isVideo = value;
                 hasInitialized = true;
                 return;
             }
 
-            // only react AFTER initialization
             if (value === false) {
-                triggerModal();
+                showUnsupportedMessage();
+            }
+
+            // ✅ RESET ERROR WHEN TRUE COMES IN
+            if (value === true) {
+                isError = false;
+                dropMessage = "drag and drop";
             }
 
             isVideo = value;
@@ -100,8 +103,6 @@
 
         window.removeEventListener("dragover", preventDefault);
         window.removeEventListener("drop", preventDefault);
-
-        clearTimeout(modalTimeout);
     });
 
     function preventDefault(e: DragEvent) {
@@ -114,32 +115,16 @@
     }
 
     // =========================
-    // ✅ MODAL CONTROL
+    // ✅ INLINE ERROR MESSAGE
     // =========================
 
-    function triggerModal() {
-        showModal = true;
-
-        clearTimeout(modalTimeout);
-        modalTimeout = setTimeout(() => {
-            showModal = false;
-        }, 3000);
-    }
-
-    function closeModal() {
-        showModal = false;
-        clearTimeout(modalTimeout);
-    }
-
-    function handleOverlayClick(e: MouseEvent) {
-        // only close if clicking OUTSIDE modal
-        if ((e.target as HTMLElement).classList.contains('video-error-overlay')) {
-            closeModal();
-        }
+    function showUnsupportedMessage() {
+        isError = true;
+        dropMessage = "unsupported file";
     }
 
     // =========================
-    // DEV DRAG SUPPORT
+    // DRAG SUPPORT
     // =========================
 
     function handleDragEnter(e: DragEvent) {
@@ -195,6 +180,7 @@
         <div
             class="drop-zone"
             class:dragging={dragging}
+            class:error={isError}
             on:dragenter={handleDragEnter}
             on:dragleave={handleDragLeave}
             on:dragover={handleDragOver}
@@ -211,7 +197,7 @@
                 {#if dragging}
                     drop file here
                 {:else}
-                    drag and drop
+                    {dropMessage}
                 {/if}
             </div>
         </div>
@@ -230,20 +216,5 @@
 
     </div>
 </div>
-
-<!-- ✅ UPDATED MODAL -->
-{#if showModal}
-    <div 
-        class="video-error-overlay" 
-        on:click={handleOverlayClick}
-        in:fade 
-        out:fade
-    >
-        <div class="video-error-modal" in:fly={{ y: 40, duration: 200 }}>
-            <h2>Unsupported File</h2>
-            <p>Please drop a valid video file.</p>
-        </div>
-    </div>
-{/if}
 
 <style src="./dragDrop.css"></style>

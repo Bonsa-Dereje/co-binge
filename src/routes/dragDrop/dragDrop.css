@@ -62,7 +62,6 @@ body.dark-mode .folder-icon {
 
 
 
-
 .video-error-overlay {
     position: fixed;
     inset: 0;
@@ -80,10 +79,11 @@ body.dark-mode .folder-icon {
     padding: 2rem 2.5rem;
     border-radius: 12px;
     text-align: center;
-    max-width: 200px;
+    max-width: 220px;
     width: 90%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: default;
 }
 
 .video-error-modal h2 {
@@ -94,6 +94,10 @@ body.dark-mode .folder-icon {
 .video-error-modal p {
     font-size: 0.95rem;
     opacity: 0.8;
+}
+
+.drop-zone.error .drop-text {
+    color: red;
 }
 
 
