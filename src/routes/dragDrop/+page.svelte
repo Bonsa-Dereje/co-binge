@@ -32,6 +32,12 @@
             entering = false;
         });
 
+        // ✅ AUTO TRIGGER AFTER 1 SECOND
+        setTimeout(() => {
+            console.log("Simulating file drop → setting isVideo = true");
+            isVideoStore.set(true);
+        }, 1000);
+
         unsubscribeUser = globalUserName.subscribe(value => {
             username = value || 'user name';
         });
@@ -40,7 +46,6 @@
             deviceId = value || '01D4TH879';
         });
 
-        // ✅ UPDATED VIDEO CHECK
         unsubscribeVideo = isVideoStore.subscribe(value => {
             if (!hasInitialized) {
                 isVideo = value;
@@ -52,7 +57,6 @@
                 showUnsupportedMessage();
             }
 
-            // ✅ RESET ERROR WHEN TRUE COMES IN
             if (value === true) {
                 isError = false;
                 dropMessage = "drag and drop";
@@ -114,18 +118,10 @@
         document.body.classList.toggle("dark-mode", darkMode);
     }
 
-    // =========================
-    // ✅ INLINE ERROR MESSAGE
-    // =========================
-
     function showUnsupportedMessage() {
         isError = true;
         dropMessage = "unsupported file";
     }
-
-    // =========================
-    // DRAG SUPPORT
-    // =========================
 
     function handleDragEnter(e: DragEvent) {
         e.preventDefault();

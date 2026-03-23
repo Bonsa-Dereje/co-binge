@@ -1,0 +1,1 @@
+import{w as a}from"./CUEiSlwT.js";function s(o,r){const t=a(r);{const e=localStorage.getItem(o);e&&t.set(e)}return t.subscribe(e=>{localStorage.setItem(o,e)}),t}const l=s("username",""),n=s("deviceId","");export{n as a,l as g};
