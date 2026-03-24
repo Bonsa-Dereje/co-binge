@@ -45,7 +45,7 @@
         leaving = true;
 
         setTimeout(() => {
-            goto('/searchResults');
+            goto('/movieCard');
         }, 400);
     }
 </script>
