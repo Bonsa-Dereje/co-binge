@@ -66,3 +66,75 @@ body.dark-mode .paste-button {
 .paste-button:active {
     transform: scale(0.95);
 }
+
+/* ------------------------------
+   Search Bar
+-------------------------------- */
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 280px;
+    margin-bottom: 15px;
+}
+
+/* Input now has space for button */
+.search-input {
+    width: 100%;
+    padding: 12px 50px 12px 16px; /* extra right padding for button */
+    border-radius: 25px;
+    border: none;
+    outline: none;
+    font-family: "DM Mono", monospace;
+    font-size: 14px;
+    background-color: #F0F0F0;
+    color: #212121;
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .search-input {
+    background-color: #1E1E1E;
+    color: #FAFAFA;
+}
+
+.search-input::placeholder {
+    opacity: 0.6;
+}
+
+/* Button now sits INSIDE */
+.search-button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-family: "DM Mono", monospace;
+    font-size: 12px;
+
+    background-color: #212121;
+    color: #FAFAFA;
+
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .search-button {
+    background-color: #FAFAFA;
+    color: #121212;
+}
+
+.search-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.search-button:hover:not(:disabled) {
+    transform: translateY(-50%) scale(1.05);
+}
+
+.search-button:active:not(:disabled) {
+    transform: translateY(-50%) scale(0.95);
+}

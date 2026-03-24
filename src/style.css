@@ -567,7 +567,7 @@ font-size: 13px;
     height: 212px;
     border: 2px solid #555;
     border-radius: 18px;
-    margin-top: 45px;
+    margin-top: 40px;
     overflow: hidden;
 
     transition: transform 0.35s cubic-bezier(.22,.61,.36,1),
@@ -607,7 +607,7 @@ body.dark-mode .ytCard .thumbnail-card {
 
 .yt-title {
     margin-top: 10px;
-    font-size: 18px;
+    font-size: 17px;
     text-align: center;
     letter-spacing: 0.5px;
 }
@@ -620,7 +620,7 @@ body.dark-mode .ytCard .thumbnail-card {
     justify-content: center;
     gap: 16px;
     margin-top: 6px;
-    font-size: 12px;
+    font-size: 11px;
     opacity: 0.8;
 }
 
