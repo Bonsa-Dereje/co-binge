@@ -66,3 +66,30 @@ body.dark-mode .paste-button {
 .paste-button:active {
     transform: scale(0.95);
 }
+
+/* 🔥 Disabled state (main fix) */
+.ytPaste .pasteButton.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+
+    background-color: #525050;
+    color: #ccc;
+    box-shadow: none;
+    transform: none;
+    filter: grayscale(60%);
+}
+
+/* Prevent hover/active styles from leaking */
+.ytPaste .pasteButton.disabled:hover,
+.ytPaste .pasteButton.disabled:active {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Enabled state */
+.ytPaste .pasteButton:not(.disabled) {
+    opacity: 1;
+    filter: none;
+    cursor: pointer;
+}
