@@ -3,6 +3,7 @@ use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use std::fs;
 use std::path::PathBuf;
+use std::process::Command;
 
 // Common video file extensions
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
@@ -43,8 +44,9 @@ pub fn run() {
             window.on_window_event(move |event| {
                 if let WindowEvent::DragDrop(event) = event {
                     if let tauri::DragDropEvent::Drop { paths, .. } = event {
-                        // Check if any file is a video
-                        let is_video = paths.iter().any(|path| {
+                        
+                        // Find first valid video file
+                        let video_path = paths.iter().find(|path| {
                             if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
                                 VIDEO_EXTENSIONS.contains(&ext.to_lowercase().as_str())
                             } else {
@@ -52,7 +54,17 @@ pub fn run() {
                             }
                         });
 
+                        let is_video = video_path.is_some();
                         println!("Is video? {}", is_video);
+
+                        // Open in VLC using full Windows path
+                        if let Some(path) = video_path {
+                            println!("Opening in VLC: {:?}", path);
+
+                            let _ = Command::new("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe")
+                                .arg(path)
+                                .spawn();
+                        }
 
                         // Emit boolean to frontend
                         let _ = window_clone.emit("file:isVideo", is_video);
