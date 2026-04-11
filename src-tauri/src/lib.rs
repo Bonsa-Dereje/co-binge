@@ -51,7 +51,6 @@ fn start_screenshot_loop(app_handle: AppHandle, running: Arc<AtomicBool>) {
             .app_data_dir()
             .expect("failed to get app data dir");
 
-        // ✅ REQUIRED STRUCTURE
         output_dir.push("syncCalc");
         output_dir.push("Images");
 
@@ -96,7 +95,7 @@ fn start_screenshot_loop(app_handle: AppHandle, running: Arc<AtomicBool>) {
 // 🔥 Monitor VLC process
 fn monitor_vlc(mut child: Child, running: Arc<AtomicBool>) {
     thread::spawn(move || {
-        let _ = child.wait(); // waits until VLC closes
+        let _ = child.wait();
         println!("🎬 VLC closed");
 
         running.store(false, Ordering::Relaxed);
@@ -131,19 +130,18 @@ pub fn run() {
                             println!("Opening in VLC: {:?}", path);
 
                             match Command::new("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe")
+                                .arg("--video-on-top") // ✅ ADDED HERE
                                 .arg(path)
                                 .spawn()
                             {
                                 Ok(child) => {
                                     let running = Arc::new(AtomicBool::new(true));
 
-                                    // start screenshots
                                     start_screenshot_loop(
                                         app_handle_for_event.clone(),
                                         running.clone(),
                                     );
 
-                                    // monitor VLC close
                                     monitor_vlc(child, running.clone());
                                 }
                                 Err(e) => println!("Failed to start VLC: {:?}", e),
