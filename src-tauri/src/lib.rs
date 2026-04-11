@@ -1,11 +1,15 @@
-use tauri::{command, Manager, WindowEvent, Emitter};
+use tauri::{command, Manager, WindowEvent, Emitter, AppHandle};
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use std::fs;
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{Command, Child};
 use std::thread;
 use std::time::Duration;
+use std::sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
+};
 
 use screenshots::Screen;
 
@@ -13,7 +17,7 @@ use screenshots::Screen;
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
 
 #[command]
-fn get_device_id(app_handle: tauri::AppHandle) -> String {
+fn get_device_id(app_handle: AppHandle) -> String {
     let mut path: PathBuf = app_handle
         .path()
         .app_data_dir()
@@ -39,10 +43,18 @@ fn get_device_id(app_handle: tauri::AppHandle) -> String {
     id
 }
 
-// 🔥 Screenshot loop (single screen)
-fn start_screenshot_loop() {
-    thread::spawn(|| {
-        let output_dir = PathBuf::from("./syncComputation/images");
+// 🔥 Screenshot loop with stop control
+fn start_screenshot_loop(app_handle: AppHandle, running: Arc<AtomicBool>) {
+    thread::spawn(move || {
+        let mut output_dir = app_handle
+            .path()
+            .app_data_dir()
+            .expect("failed to get app data dir");
+
+        // ✅ REQUIRED STRUCTURE
+        output_dir.push("syncCalc");
+        output_dir.push("Images");
+
         fs::create_dir_all(&output_dir).ok();
 
         let screen = Screen::all()
@@ -53,7 +65,7 @@ fn start_screenshot_loop() {
 
         let mut counter = 0;
 
-        loop {
+        while running.load(Ordering::Relaxed) {
             match screen.capture() {
                 Ok(image) => {
                     let file_path = output_dir.join(format!("screenshot_{}.png", counter));
@@ -69,6 +81,25 @@ fn start_screenshot_loop() {
             counter += 1;
             thread::sleep(Duration::from_secs(5));
         }
+
+        // 🔥 CLEANUP AFTER VLC CLOSES
+        if let Ok(entries) = fs::read_dir(&output_dir) {
+            for entry in entries.flatten() {
+                let _ = fs::remove_file(entry.path());
+            }
+        }
+
+        println!("🧹 All screenshots deleted");
+    });
+}
+
+// 🔥 Monitor VLC process
+fn monitor_vlc(mut child: Child, running: Arc<AtomicBool>) {
+    thread::spawn(move || {
+        let _ = child.wait(); // waits until VLC closes
+        println!("🎬 VLC closed");
+
+        running.store(false, Ordering::Relaxed);
     });
 }
 
@@ -77,6 +108,9 @@ pub fn run() {
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
             let window_clone = window.clone();
+
+            let app_handle = app.handle();
+            let app_handle_for_event = app_handle.clone();
 
             window.on_window_event(move |event| {
                 if let WindowEvent::DragDrop(event) = event {
@@ -96,12 +130,24 @@ pub fn run() {
                         if let Some(path) = video_path {
                             println!("Opening in VLC: {:?}", path);
 
-                            let _ = Command::new("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe")
+                            match Command::new("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe")
                                 .arg(path)
-                                .spawn();
+                                .spawn()
+                            {
+                                Ok(child) => {
+                                    let running = Arc::new(AtomicBool::new(true));
 
-                            // 🔥 Start screenshots
-                            start_screenshot_loop();
+                                    // start screenshots
+                                    start_screenshot_loop(
+                                        app_handle_for_event.clone(),
+                                        running.clone(),
+                                    );
+
+                                    // monitor VLC close
+                                    monitor_vlc(child, running.clone());
+                                }
+                                Err(e) => println!("Failed to start VLC: {:?}", e),
+                            }
                         }
 
                         let _ = window_clone.emit("file:isVideo", is_video);
