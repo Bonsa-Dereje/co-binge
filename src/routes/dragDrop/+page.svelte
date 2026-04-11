@@ -1,7 +1,9 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
+    import { goto } from "$app/navigation";
     import { globalUserName, globalDeviceId } from '$lib/stores/user';
     import { isVideoStore } from '$lib/stores/isVideo';
+    import { isSyncingStore } from '$lib/stores/isSyncing'; // ✅ NEW
     import { listen } from "@tauri-apps/api/event";
 
     let entering = true;
@@ -12,7 +14,7 @@
     let dragging = false;
     let isVideo = true;
 
-    // ✅ NEW TEXT STATE
+    // ✅ TEXT STATE
     let dropMessage = "drag and drop";
     let isError = false;
 
@@ -31,12 +33,6 @@
         requestAnimationFrame(() => {
             entering = false;
         });
-
-        // ✅ AUTO TRIGGER AFTER 1 SECOND
-        setTimeout(() => {
-            console.log("Simulating file drop → setting isVideo = true");
-            isVideoStore.set(true);
-        }, 1000);
 
         unsubscribeUser = globalUserName.subscribe(value => {
             username = value || 'user name';
@@ -60,6 +56,12 @@
             if (value === true) {
                 isError = false;
                 dropMessage = "drag and drop";
+
+                // ✅ START SYNC
+                isSyncingStore.set(true);
+
+                // ✅ NAVIGATE
+                goto("/loadingScreen");
             }
 
             isVideo = value;
@@ -154,6 +156,8 @@
         } else {
             console.log("Handling browser file:", file.name);
         }
+
+        // Validation handled by backend → emits 'file:isVideo'
     }
 </script>
 
