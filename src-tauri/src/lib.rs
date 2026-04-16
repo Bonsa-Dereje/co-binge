@@ -44,83 +44,95 @@ fn get_device_id(app_handle: AppHandle) -> String {
     id
 }
 
-// 🔥 Send command to VLC via RC interface
+// Send command to VLC via RC interface
 fn send_vlc_command(rc_port: u16, command: &str) -> Result<String, String> {
     use std::net::TcpStream;
-    use std::io::{Write, BufRead, BufReader};
-    
-    match TcpStream::connect_timeout(&format!("127.0.0.1:{}", rc_port).parse().unwrap(), Duration::from_secs(2)) {
+
+    match TcpStream::connect_timeout(
+        &format!("127.0.0.1:{}", rc_port).parse().unwrap(),
+        Duration::from_secs(2),
+    ) {
         Ok(mut stream) => {
-            // Send command
             if let Err(e) = write!(stream, "{}\n", command) {
                 return Err(format!("Failed to send command: {}", e));
             }
-            
-            // Read response
+
             let mut reader = BufReader::new(stream);
             let mut response = String::new();
             let _ = reader.read_line(&mut response);
-            
+
             Ok(response)
         }
         Err(e) => Err(format!("Failed to connect to VLC RC interface: {}", e)),
     }
 }
 
-// 🔥 Start VLC with RC interface enabled
+// Start VLC with RC interface enabled
 fn start_vlc_with_rc(video_path: &PathBuf, rc_port: u16) -> Result<Child, std::io::Error> {
     Command::new("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe")
         .arg("--video-on-top")
-        .arg("--extraintf=rc")  // Enable RC interface
-        .arg("--rc-host=127.0.0.1:".to_string() + &rc_port.to_string())  // Set RC port
-        .arg("--rc-quiet")  // Less verbose output
+        .arg("--extraintf=rc")
+        .arg("--rc-host=127.0.0.1:".to_string() + &rc_port.to_string())
+        .arg("--rc-quiet")
         .arg(video_path)
         .spawn()
 }
 
-// 🔥 Control VLC timeline: pause at 0.1s, wait 5s, then play
+// Control VLC timeline
 fn control_vlc_timeline(app_handle: AppHandle, rc_port: u16) {
     thread::spawn(move || {
-        // Wait 2 seconds for VLC to start and load the video
         thread::sleep(Duration::from_secs(2));
-        println!("⏸️ Pausing video at 0.1 seconds...");
-        
-        // Seek to 0.1 seconds (100 milliseconds)
-        match send_vlc_command(rc_port, "seek +0.1") {
-            Ok(_) => println!("✅ Seeked to 0.1 seconds"),
-            Err(e) => {
-                println!("❌ Failed to seek: {}", e);
-                return;
-            }
+
+        println!("Pausing video at 0.1 seconds...");
+
+        // Seek to 0.1s
+        if let Err(e) = send_vlc_command(rc_port, "seek +0.1") {
+            println!("Failed to seek: {}", e);
+            return;
         }
-        
-        // Small delay to ensure seek completes
+
         thread::sleep(Duration::from_millis(100));
-        
-        // Pause the video
-        match send_vlc_command(rc_port, "pause") {
-            Ok(_) => println!("✅ Video paused at 0.1 seconds"),
-            Err(e) => println!("❌ Failed to pause: {}", e),
-        }
-        
-        // Wait 5 seconds while paused
-        println!("⏳ Waiting 5 seconds...");
+
+        // Pause
+        let _ = send_vlc_command(rc_port, "pause");
+
+        println!("Waiting 5 seconds...");
         thread::sleep(Duration::from_secs(5));
-        
-        // Resume playing - using "pause" again toggles play/pause
-        // Alternatively use "key key-action=key-press key-press=space"
-        println!("▶️ Resuming video playback...");
-        match send_vlc_command(rc_port, "pause") {
-            Ok(_) => println!("✅ Video playing"),
-            Err(e) => println!("❌ Failed to play: {}", e),
+
+        // Resume
+        println!("Resuming playback...");
+        let _ = send_vlc_command(rc_port, "pause");
+
+        // Wait 5 seconds after playing
+        thread::sleep(Duration::from_secs(5));
+
+        println!("Seeking forward 1 minute...");
+        if let Err(e) = send_vlc_command(rc_port, "seek +60") {
+            println!("Failed to seek 1 minute: {}", e);
+            return;
         }
-        
-        // Emit event to frontend
-        let _ = app_handle.emit("vlc:controlComplete", "Video paused at 0.1s, waited 5s, and resumed");
+
+        thread::sleep(Duration::from_millis(200));
+
+        // Pause again
+        println!("Pausing after seek...");
+        let _ = send_vlc_command(rc_port, "pause");
+
+        println!("Waiting 3 seconds...");
+        thread::sleep(Duration::from_secs(3));
+
+        // Play again
+        println!("Resuming playback again...");
+        let _ = send_vlc_command(rc_port, "pause");
+
+        let _ = app_handle.emit(
+            "vlc:controlComplete",
+            "Sequence complete: initial pause, resume, seek +1min, pause, resume",
+        );
     });
 }
 
-// 🔥 Screenshot loop with stop control
+// Screenshot loop with stop control
 fn start_screenshot_loop(app_handle: AppHandle, running: Arc<AtomicBool>) {
     thread::spawn(move || {
         let mut output_dir = app_handle
@@ -158,22 +170,22 @@ fn start_screenshot_loop(app_handle: AppHandle, running: Arc<AtomicBool>) {
             thread::sleep(Duration::from_secs(5));
         }
 
-        // 🔥 CLEANUP AFTER VLC CLOSES
+        // Cleanup
         if let Ok(entries) = fs::read_dir(&output_dir) {
             for entry in entries.flatten() {
                 let _ = fs::remove_file(entry.path());
             }
         }
 
-        println!("🧹 All screenshots deleted");
+        println!("All screenshots deleted");
     });
 }
 
-// 🔥 Monitor VLC process
+// Monitor VLC process
 fn monitor_vlc(mut child: Child, running: Arc<AtomicBool>) {
     thread::spawn(move || {
         let _ = child.wait();
-        println!("🎬 VLC closed");
+        println!("VLC closed");
 
         running.store(false, Ordering::Relaxed);
     });
@@ -205,25 +217,24 @@ pub fn run() {
 
                         if let Some(path) = video_path {
                             println!("Opening in VLC: {:?}", path);
-                            
-                            // Use fixed port for RC interface
+
                             let rc_port = 42123;
-                            
+
                             match start_vlc_with_rc(&path, rc_port) {
                                 Ok(child) => {
                                     let running = Arc::new(AtomicBool::new(true));
-                                    
-                                    // Start screenshot loop
+
                                     start_screenshot_loop(
                                         app_handle_for_event.clone(),
                                         running.clone(),
                                     );
-                                    
-                                    // Monitor VLC process
+
                                     monitor_vlc(child, running.clone());
-                                    
-                                    // Control VLC timeline after it starts
-                                    control_vlc_timeline(app_handle_for_event.clone(), rc_port);
+
+                                    control_vlc_timeline(
+                                        app_handle_for_event.clone(),
+                                        rc_port,
+                                    );
                                 }
                                 Err(e) => println!("Failed to start VLC: {:?}", e),
                             }

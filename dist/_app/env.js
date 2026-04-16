@@ -1,1 +1,1 @@
-export const env={}
+export const env={"PUBLIC_YOUTUBE_API_KEY":"AIzaSyCBEz1zG6YwMIKMkxL3CoCISE02I2Dda0w"}
