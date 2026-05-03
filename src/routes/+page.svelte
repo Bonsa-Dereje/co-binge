@@ -4,7 +4,7 @@
 
     onMount(() => {
         const timer = setTimeout(() => {
-            goto('/hostJoin');
+            goto('/userSetup');
         }, 3000);
 
         return () => clearTimeout(timer);
