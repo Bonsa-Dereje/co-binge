@@ -19,6 +19,7 @@ use reqwest;
 use mongodb::{Client};
 use mongodb::bson::doc;
 use chrono::{Timelike};
+use dotenvy::dotenv;
 
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
 
@@ -75,7 +76,9 @@ async fn fetch_host_time() -> Result<String, Box<dyn std::error::Error + Send + 
 }
 
 async fn save_time_to_mongo(sync_time: String) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // ✅ dotenv ensures MONGO_URI is loaded
     let uri = std::env::var("MONGO_URI")?;
+
     let client = Client::with_uri_str(uri).await?;
 
     let db = client.database("timeSync");
@@ -203,11 +206,13 @@ fn monitor_vlc(mut child: Child, running: Arc<AtomicBool>) {
 // ---------------- MAIN ----------------
 
 pub fn run() {
+    dotenv().ok(); // ✅ LOAD .env HERE
+
     tauri::Builder::default()
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
 
-            // ✅ FIX: clone BEFORE move
+            // FIX: correct ownership
             let window_for_event = window.clone();
             let app_handle = app.handle().clone();
 

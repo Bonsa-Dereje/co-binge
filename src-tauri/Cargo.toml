@@ -35,3 +35,4 @@ reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 mongodb = "2"
+dotenvy = "0.15"
