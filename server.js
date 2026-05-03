@@ -12,7 +12,7 @@ const client = new MongoClient(process.env.MONGO_URI);
 let collection;
 
 /**
- * Fetch time from API (same logic as your Svelte app)
+ * Fetch time from API and add +5 seconds
  */
 async function fetchHostTime() {
     const res = await fetch("https://time.now/developer/api/ip");
@@ -20,50 +20,37 @@ async function fetchHostTime() {
 
     const date = new Date(data.datetime);
 
-    const plusFive = new Date(date.getTime() + 5000);
+    // +5 seconds adjustment
+    const adjusted = new Date(date.getTime() + 5000);
 
-    return {
-        utcTime: date.toISOString(),
-        plusFiveTime: plusFive.toISOString(),
-        hh: String(date.getHours()).padStart(2, "0"),
-        mm: String(date.getMinutes()).padStart(2, "0"),
-        ss: String(date.getSeconds()).padStart(2, "0"),
-        hh2: String(plusFive.getHours()).padStart(2, "0"),
-        mm2: String(plusFive.getMinutes()).padStart(2, "0"),
-        ss2: String(plusFive.getSeconds()).padStart(2, "0")
-    };
+    const syncTime = `${String(adjusted.getHours()).padStart(2, "0")}:` +
+                      `${String(adjusted.getMinutes()).padStart(2, "0")}:` +
+                      `${String(adjusted.getSeconds()).padStart(2, "0")}`;
+
+    return syncTime;
 }
 
 /**
- * Save time into MongoDB
+ * Save ONLY syncTime into MongoDB
  */
-async function saveTime(deviceId = "server-device") {
-    const timeData = await fetchHostTime();
+async function saveTime() {
+    const syncTime = await fetchHostTime();
 
     await collection.updateOne(
-        { type: "hostTime" },
+        { _id: "hostTime" },
         {
             $set: {
-                deviceId,
-                utcTime: timeData.utcTime,
-                plusFiveTime: timeData.plusFiveTime,
-                hh: timeData.hh,
-                mm: timeData.mm,
-                ss: timeData.ss,
-                hh2: timeData.hh2,
-                mm2: timeData.mm2,
-                ss2: timeData.ss2,
-                savedAt: new Date()
+                syncTime
             }
         },
         { upsert: true }
     );
 
-    console.log("✅ Time saved to MongoDB:", timeData.hh + ":" + timeData.mm + ":" + timeData.ss);
+    console.log(`✅ Saved syncTime: ${syncTime}`);
 }
 
 /**
- * Connect DB + run initial save
+ * Connect DB + initial save
  */
 async function connectDB() {
     try {
@@ -74,8 +61,8 @@ async function connectDB() {
 
         console.log("✅ Connected to MongoDB");
 
-        // 🚀 Run immediately when server starts
-        await saveTime("server-startup");
+        // Save immediately on startup
+        await saveTime();
 
     } catch (err) {
         console.error("❌ MongoDB error:", err);
@@ -85,18 +72,19 @@ async function connectDB() {
 connectDB();
 
 /**
- * Optional endpoint (same logic as frontend "Host" button)
+ * Manual trigger endpoint
  */
 app.post("/save-time", async (req, res) => {
     try {
-        const { deviceId } = req.body;
+        await saveTime();
 
-        await saveTime(deviceId);
-
-        res.json({ success: true, message: "Time saved" });
+        res.json({
+            success: true,
+            message: "syncTime saved",
+        });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Failed to save time" });
+        res.status(500).json({ error: "Failed to save syncTime" });
     }
 });
 
@@ -104,7 +92,7 @@ app.post("/save-time", async (req, res) => {
  * Check DB contents
  */
 app.get("/check", async (req, res) => {
-    const doc = await collection.findOne({ type: "hostTime" });
+    const doc = await collection.findOne({ _id: "hostTime" });
     res.json(doc || { message: "nothing found" });
 });
 

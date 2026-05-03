@@ -8,8 +8,6 @@ repository = ""
 edition = "2021"
 rust-version = "1.77.2"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
@@ -24,8 +22,16 @@ log = "0.4"
 tauri = { version = "2.10.3", features = [] }
 tauri-plugin-log = "2"
 
-# Added for persistent device ID generation
+# Existing
 uuid = { version = "1", features = ["v4"] }
-
 rand = "0.8"
 screenshots = "0.8.10"
+
+# ---------------- NEW ADDITIONS ----------------
+tokio = { version = "1", features = ["full"] }
+
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+chrono = { version = "0.4", features = ["serde"] }
+
+mongodb = "2"
