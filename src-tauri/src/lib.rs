@@ -18,7 +18,7 @@ use screenshots::Screen;
 use reqwest;
 use mongodb::{Client};
 use mongodb::bson::doc;
-use chrono::{Timelike};
+use chrono::Timelike;
 use dotenvy::dotenv;
 
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
@@ -75,34 +75,37 @@ async fn fetch_host_time() -> Result<String, Box<dyn std::error::Error + Send + 
     Ok(sync_time)
 }
 
-async fn save_time_to_mongo(sync_time: String) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    // ✅ dotenv ensures MONGO_URI is loaded
-    let uri = std::env::var("MONGO_URI")?;
+async fn save_time_to_mongo(
+    device_id: String,
+    sync_time: String,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
+    let uri = std::env::var("MONGO_URI")?;
     let client = Client::with_uri_str(uri).await?;
 
     let db = client.database("timeSync");
     let collection = db.collection::<mongodb::bson::Document>("timeSync");
 
     collection.update_one(
-        doc! { "_id": "hostTime" },
+        doc! { "_id": device_id.clone() }, // ✅ use device_id as ID
         doc! {
             "$set": {
-                "syncTime": sync_time
+                "syncTime": &sync_time // ✅ FIX: borrow instead of move
             }
         },
         mongodb::options::UpdateOptions::builder().upsert(true).build(),
     ).await?;
 
-    println!("✅ Saved syncTime to MongoDB");
+    println!("✅ Saved for device {} -> {}", device_id, sync_time);
+
     Ok(())
 }
 
-async fn run_time_sync() {
+async fn run_time_sync(device_id: String) {
     if let Ok(time) = fetch_host_time().await {
         println!("Fetched time: {}", time);
 
-        if let Err(e) = save_time_to_mongo(time).await {
+        if let Err(e) = save_time_to_mongo(device_id, time).await {
             println!("Mongo save error: {:?}", e);
         }
     }
@@ -206,13 +209,12 @@ fn monitor_vlc(mut child: Child, running: Arc<AtomicBool>) {
 // ---------------- MAIN ----------------
 
 pub fn run() {
-    dotenv().ok(); // ✅ LOAD .env HERE
+    dotenv().ok();
 
     tauri::Builder::default()
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
 
-            // FIX: correct ownership
             let window_for_event = window.clone();
             let app_handle = app.handle().clone();
 
@@ -231,14 +233,14 @@ pub fn run() {
                         let is_video = video_path.is_some();
                         println!("Is video? {}", is_video);
 
-                        // ---------------- TIME SYNC ----------------
                         if is_video {
-                            tauri::async_runtime::spawn(async {
-                                run_time_sync().await;
+                            let device_id = get_device_id(app_handle.clone());
+
+                            tauri::async_runtime::spawn(async move {
+                                run_time_sync(device_id).await;
                             });
                         }
 
-                        // ---------------- VLC ----------------
                         if let Some(path) = video_path {
                             let rc_port = 42123;
 
