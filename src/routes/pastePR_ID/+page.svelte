@@ -4,29 +4,48 @@
 
     let entering = true;
     let darkMode = false;
-    let username = '';   // loaded from global store
-    let deviceId = '';   // loaded from global store
+    let username = '';
+    let deviceId = '';
     let groupId = "";
+
+    const REQUIRED_LENGTH = 12;
 
     onMount(() => {
         requestAnimationFrame(() => {
             entering = false;
         });
 
-        // Subscribe to global stores
         const unsubscribeUser = globalUserName.subscribe(value => {
             username = value || 'user name';
         });
+
         const unsubscribeDevice = globalDeviceId.subscribe(value => {
             deviceId = value || '01D4TH879';
         });
 
-        // Cleanup subscriptions when component unmounts
+        checkClipboard();
+
+        // optional: re-check when user returns to tab
+        window.addEventListener('focus', checkClipboard);
+
         return () => {
             unsubscribeUser();
             unsubscribeDevice();
+            window.removeEventListener('focus', checkClipboard);
         };
     });
+
+    async function checkClipboard() {
+        try {
+            const text = (await navigator.clipboard.readText()).trim();
+
+            if (text.length === REQUIRED_LENGTH) {
+                groupId = text;
+            }
+        } catch (err) {
+            console.warn("Clipboard access denied");
+        }
+    }
 
     function toggleDarkMode() {
         darkMode = !darkMode;
@@ -34,8 +53,11 @@
     }
 
     function joinGroup() {
+        if (groupId.length !== REQUIRED_LENGTH) return;
         console.log("Joining group:", groupId);
     }
+
+    $: isValid = groupId.length === REQUIRED_LENGTH;
 </script>
 
 <div class="page-wrapper join-page" class:entering={entering}>
@@ -59,11 +81,15 @@
 
             <input
                 class="group-input"
-                placeholder="group Id"
+                placeholder="pairing id"
                 bind:value={groupId}
             />
 
-            <button class="join-button" on:click={joinGroup}>
+            <button
+                class="join-button"
+                class:active={isValid}
+                on:click={joinGroup}
+            >
                 Join
             </button>
 

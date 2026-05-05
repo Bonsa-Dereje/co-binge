@@ -47,11 +47,20 @@ body.dark-mode .group-input{
     border-radius: 25px;
 
     opacity: 0.5;
+    background: #000;
+    color: #fff;
 
     margin-bottom: 11px;
+
+    transition: all 0.2s ease;
 }
 
-.join-button:hover{
-    opacity: 0.7;
+/* enabled state */
+.join-button.active{
+    opacity: 1;
 }
 
+/* hover only when active */
+.join-button.active:hover{
+    opacity: 0.85;
+}
