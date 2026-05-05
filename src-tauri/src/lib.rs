@@ -50,6 +50,33 @@ fn get_device_id(app_handle: AppHandle) -> String {
     id
 }
 
+// ---------------- NEW: HOST FLAG ----------------
+
+#[command]
+async fn set_hosting_true(device_id: String) -> Result<(), String> {
+    let uri = std::env::var("MONGO_URI").map_err(|e| e.to_string())?;
+    let client = Client::with_uri_str(uri).await.map_err(|e| e.to_string())?;
+
+    let db = client.database("timeSync");
+    let collection = db.collection::<mongodb::bson::Document>("timeSync");
+
+    collection.update_one(
+        doc! { "_id": device_id.clone() },
+        doc! {
+            "$set": {
+                "hosting": true
+            }
+        },
+        mongodb::options::UpdateOptions::builder().upsert(true).build(),
+    )
+    .await
+    .map_err(|e| e.to_string())?;
+
+    println!("✅ Hosting TRUE set for {}", device_id);
+
+    Ok(())
+}
+
 // ---------------- TIME + MONGO ----------------
 
 async fn fetch_host_time() -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
@@ -87,10 +114,10 @@ async fn save_time_to_mongo(
     let collection = db.collection::<mongodb::bson::Document>("timeSync");
 
     collection.update_one(
-        doc! { "_id": device_id.clone() }, // ✅ use device_id as ID
+        doc! { "_id": device_id.clone() },
         doc! {
             "$set": {
-                "syncTime": &sync_time // ✅ FIX: borrow instead of move
+                "syncTime": &sync_time
             }
         },
         mongodb::options::UpdateOptions::builder().upsert(true).build(),
@@ -260,7 +287,10 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_device_id])
+        .invoke_handler(tauri::generate_handler![
+            get_device_id,
+            set_hosting_true // ✅ ADDED
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -2,22 +2,23 @@
 import { onMount } from 'svelte';
 import { goto } from '$app/navigation';
 import { globalUserName, globalDeviceId } from '$lib/stores/user';
+import { invoke } from '@tauri-apps/api/core'; // ✅ ADD
 
 let entering = true;
 let leaving = false;
 let darkMode = false;
-let username = '';   // loaded from global store
-let deviceId = '';   // loaded from global store
+let username = '';
+let deviceId = '';
 
 onMount(() => {
     requestAnimationFrame(() => {
         entering = false;
     });
 
-    // Subscribe to global stores
     globalUserName.subscribe(value => {
         username = value || 'user name';
     });
+
     globalDeviceId.subscribe(value => {
         deviceId = value || 'Loading...';
     });
@@ -28,11 +29,24 @@ function toggleDarkMode() {
     document.body.classList.toggle("dark-mode", darkMode);
 }
 
+// ✅ UPDATED: navigate first, write to DB in background
 function handleHostClick() {
     leaving = true;
-    setTimeout(() => {
-        goto('/pairPage');
-    }, 400);
+
+    // navigate immediately
+    goto('/pairPage');
+
+    // run DB write in background (non-blocking)
+    setTimeout(async () => {
+        try {
+            await invoke("set_hosting_true", {
+                deviceId: deviceId
+            });
+            console.log("Hosting set to TRUE");
+        } catch (e) {
+            console.error("Failed to set hosting:", e);
+        }
+    }, 0);
 }
 
 function handleJoinClick() {
@@ -47,7 +61,6 @@ function handleJoinClick() {
 
     <div class="card">
 
-        <!-- Toggle -->
         <div class="toggle-wrapper">
             <button 
                 class="toggle"
@@ -59,7 +72,6 @@ function handleJoinClick() {
             </button>
         </div>
 
-        <!-- Center Host / Join -->
         <div class="session-wrapper" class:leaving={leaving}>
 
             <button class="session-button" on:click={handleHostClick}>
@@ -74,7 +86,6 @@ function handleJoinClick() {
 
         </div>
 
-        <!-- Bottom Profile -->
         <div class="profile-wrapper">
 
             <img 
