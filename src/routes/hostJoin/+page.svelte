@@ -31,7 +31,7 @@ function toggleDarkMode() {
 function handleHostClick() {
     leaving = true;
     setTimeout(() => {
-        goto('/chooseApp');
+        goto('/pairPage');
     }, 400);
 }
 
