@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { globalUserName, globalDeviceId } from '$lib/stores/user';
+    import { invoke } from '@tauri-apps/api/core'; // ✅ ADDED
 
     let entering = true;
     let darkMode = false;
@@ -25,7 +26,6 @@
 
         checkClipboard();
 
-        // optional: re-check when user returns to tab
         window.addEventListener('focus', checkClipboard);
 
         return () => {
@@ -52,9 +52,16 @@
         document.body.classList.toggle("dark-mode", darkMode);
     }
 
-    function joinGroup() {
+    // ✅ UPDATED JOIN FUNCTION
+    async function joinGroup() {
         if (groupId.length !== REQUIRED_LENGTH) return;
-        console.log("Joining group:", groupId);
+
+        try {
+            const result = await invoke("join_with_clipboard"); // 🔥 CALL BACKEND
+            console.log("✅", result);
+        } catch (err) {
+            console.error("❌ Join failed:", err);
+        }
     }
 
     $: isValid = groupId.length === REQUIRED_LENGTH;
