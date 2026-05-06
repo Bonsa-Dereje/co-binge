@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { globalUserName, globalDeviceId } from '$lib/stores/user';
-    import { invoke } from '@tauri-apps/api/core'; // ✅ ADDED
+    import { invoke } from '@tauri-apps/api/core';
 
     let entering = true;
     let darkMode = false;
@@ -52,13 +52,17 @@
         document.body.classList.toggle("dark-mode", darkMode);
     }
 
-    // ✅ UPDATED JOIN FUNCTION
+    // ✅ FIXED JOIN FUNCTION (CALLS BACKEND join_pairing)
     async function joinGroup() {
         if (groupId.length !== REQUIRED_LENGTH) return;
 
         try {
-            const result = await invoke("join_with_clipboard"); // 🔥 CALL BACKEND
-            console.log("✅", result);
+            const result = await invoke("join_pairing", {
+                deviceId: deviceId,
+                clipboard: groupId
+            });
+
+            console.log("✅ Pairing success:", result);
         } catch (err) {
             console.error("❌ Join failed:", err);
         }

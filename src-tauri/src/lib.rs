@@ -21,8 +21,7 @@ use mongodb::bson::doc;
 use chrono::Timelike;
 use dotenvy::dotenv;
 
-// ✅ NEW IMPORTS FOR JOIN
-use arboard::Clipboard;
+// ADDED IMPORT
 use regex::Regex;
 
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
@@ -81,62 +80,47 @@ async fn set_hosting_true(device_id: String) -> Result<(), String> {
     Ok(())
 }
 
-// ---------------- ✅ NEW: JOIN FUNCTION ----------------
+// ---------------- NEW: JOIN PAIRING FUNCTION ----------------
 
 #[command]
-async fn join_with_clipboard(app_handle: AppHandle) -> Result<String, String> {
+async fn join_pairing(device_id: String, clipboard: String) -> Result<(), String> {
+    // Validate clipboard matches 12 uppercase alphanumeric pattern
+    let re = Regex::new(r"^[A-Z0-9]{12}$").map_err(|e| e.to_string())?;
 
-    // 1. Read clipboard
-    let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
-    let clipboard_text = clipboard.get_text().map_err(|e| e.to_string())?;
-
-    let trimmed = clipboard_text.trim();
-
-    // 2. Validate regex (12 uppercase alphanumeric)
-    let re = Regex::new(r"^[A-Z0-9]{12}$").unwrap();
-
-    if !re.is_match(trimmed) {
-        return Err("Clipboard does not contain a valid device ID".into());
+    if !re.is_match(&clipboard) {
+        return Err("Invalid pairing code format".to_string());
     }
 
-    let host_id = trimmed.to_string();
-
-    // 3. Get current device id (client)
-    let client_id = get_device_id(app_handle.clone());
-
-    // 4. Mongo connection
     let uri = std::env::var("MONGO_URI").map_err(|e| e.to_string())?;
     let client = Client::with_uri_str(uri).await.map_err(|e| e.to_string())?;
 
     let db = client.database("timeSync");
     let collection = db.collection::<mongodb::bson::Document>("timeSync");
 
-    // 5. Check if host exists
-    let host_doc = collection
-        .find_one(doc! { "_id": &host_id }, None)
-        .await
-        .map_err(|e| e.to_string())?;
-
-    if host_doc.is_none() {
-        return Err("Host not found in database".into());
-    }
-
-    // 6. Update current device -> paired_to
-    collection.update_one(
-        doc! { "_id": client_id.clone() },
+    // Find host (clipboard id) and update it
+    let result = collection.update_one(
+        doc! { "_id": clipboard.clone() },
         doc! {
             "$set": {
-                "paired_to": host_id.clone()
+                "paired_to": device_id.clone()
             }
         },
-        mongodb::options::UpdateOptions::builder().upsert(true).build(),
+        mongodb::options::UpdateOptions::builder().upsert(false).build(),
     )
     .await
     .map_err(|e| e.to_string())?;
 
-    println!("✅ {} paired to {}", client_id, host_id);
+    if result.matched_count == 0 {
+        return Err("Host device not found in database".to_string());
+    }
 
-    Ok(format!("Paired to {}", host_id))
+    println!(
+        "🔗 Paired client {} -> host {}",
+        device_id,
+        clipboard
+    );
+
+    Ok(())
 }
 
 // ---------------- TIME + MONGO ----------------
@@ -352,7 +336,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_device_id,
             set_hosting_true,
-            join_with_clipboard // ✅ ADDED
+            join_pairing // ✅ ADDED
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
