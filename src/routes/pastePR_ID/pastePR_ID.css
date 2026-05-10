@@ -64,3 +64,26 @@ body.dark-mode .group-input{
 .join-button.active:hover{
     opacity: 0.85;
 }
+
+    .button-row {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .find-button {
+        flex: 1;
+        opacity: 0.5;
+        transition: 0.2s;
+    }
+
+    .find-button.active {
+        opacity: 1;
+    }
+
+    .status-text {
+        margin-top: 14px;
+        font-size: 14px;
+        text-align: center;
+        font-weight: 600;
+    }

@@ -23,6 +23,7 @@ use dotenvy::dotenv;
 
 // ADDED IMPORT
 use regex::Regex;
+use arboard::Clipboard;
 
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
 
@@ -83,21 +84,51 @@ async fn set_hosting_true(device_id: String) -> Result<(), String> {
 // ---------------- NEW: JOIN PAIRING FUNCTION ----------------
 
 #[command]
-async fn join_pairing(device_id: String, clipboard: String) -> Result<(), String> {
-    // Validate clipboard matches 12 uppercase alphanumeric pattern
-    let re = Regex::new(r"^[A-Z0-9]{12}$").map_err(|e| e.to_string())?;
+async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
+    println!("JOIN FUNCTION CALLED");
+
+    // ---------------- GET DEVICE ID ----------------
+
+    let device_id = get_device_id(app_handle.clone());
+
+    println!("Current device id: {}", device_id);
+
+    // ---------------- GET CLIPBOARD ----------------
+
+    let clipboard = arboard::Clipboard::new()
+        .map_err(|e| e.to_string())?
+        .get_text()
+        .map_err(|e| e.to_string())?
+        .trim()
+        .to_string();
+
+    println!("Clipboard text: {}", clipboard);
+
+    // ---------------- VALIDATE ----------------
+
+    let re = Regex::new(r"^[A-Z0-9]{12}$")
+        .map_err(|e| e.to_string())?;
 
     if !re.is_match(&clipboard) {
         return Err("Invalid pairing code format".to_string());
     }
 
-    let uri = std::env::var("MONGO_URI").map_err(|e| e.to_string())?;
-    let client = Client::with_uri_str(uri).await.map_err(|e| e.to_string())?;
+    // ---------------- CONNECT MONGO ----------------
+
+    let uri = std::env::var("MONGO_URI")
+        .map_err(|e| e.to_string())?;
+
+    let client = Client::with_uri_str(uri)
+        .await
+        .map_err(|e| e.to_string())?;
 
     let db = client.database("timeSync");
-    let collection = db.collection::<mongodb::bson::Document>("timeSync");
 
-    // Find host (clipboard id) and update it
+    let collection =
+        db.collection::<mongodb::bson::Document>("timeSync");
+
+    // ---------------- UPDATE HOST ----------------
+
     let result = collection.update_one(
         doc! { "_id": clipboard.clone() },
         doc! {
@@ -105,7 +136,9 @@ async fn join_pairing(device_id: String, clipboard: String) -> Result<(), String
                 "paired_to": device_id.clone()
             }
         },
-        mongodb::options::UpdateOptions::builder().upsert(false).build(),
+        mongodb::options::UpdateOptions::builder()
+            .upsert(false)
+            .build(),
     )
     .await
     .map_err(|e| e.to_string())?;

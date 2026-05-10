@@ -52,21 +52,15 @@
         document.body.classList.toggle("dark-mode", darkMode);
     }
 
-    // ✅ FIXED JOIN FUNCTION (CALLS BACKEND join_pairing)
-    async function joinGroup() {
-        if (groupId.length !== REQUIRED_LENGTH) return;
+   async function joinGroup() {
+    try {
+        const result = await invoke("join_pairing");
 
-        try {
-            const result = await invoke("join_pairing", {
-                deviceId: deviceId,
-                clipboard: groupId
-            });
-
-            console.log("✅ Pairing success:", result);
-        } catch (err) {
-            console.error("❌ Join failed:", err);
-        }
+        console.log("✅ Pairing success:", result);
+    } catch (err) {
+        console.error("❌ Join failed:", err);
     }
+}
 
     $: isValid = groupId.length === REQUIRED_LENGTH;
 </script>
