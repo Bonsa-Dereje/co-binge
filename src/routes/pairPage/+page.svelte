@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { globalUserName, globalDeviceId } from '$lib/stores/user';
+    import { invoke } from '@tauri-apps/api/core';
 
     let entering = true;
     let darkMode = false;
@@ -32,6 +33,15 @@
         requestAnimationFrame(() => {
             entering = false;
         });
+
+        // CALL pair_checker ON PAGE LOAD
+        invoke('pair_checker')
+            .then(() => {
+                console.log("pair_checker finished");
+            })
+            .catch((err) => {
+                console.error("pair_checker error:", err);
+            });
 
         const unsubscribeUser = globalUserName.subscribe(value => {
             username = value || 'user name';

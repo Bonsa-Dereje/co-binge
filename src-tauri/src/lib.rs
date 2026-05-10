@@ -19,13 +19,17 @@ use reqwest;
 use mongodb::{Client};
 use mongodb::bson::doc;
 use chrono::Timelike;
-use dotenvy::dotenv;
 
 // ADDED IMPORT
 use regex::Regex;
 use arboard::Clipboard;
 
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
+
+// ---------------- HARD CODED MONGO URI ----------------
+
+const MONGO_URI: &str =
+    "mongodb+srv://coBinge:31211@cobinge.eicnmv9.mongodb.net/?appName=coBinge";
 
 #[command]
 fn get_device_id(app_handle: AppHandle) -> String {
@@ -58,8 +62,9 @@ fn get_device_id(app_handle: AppHandle) -> String {
 
 #[command]
 async fn set_hosting_true(device_id: String) -> Result<(), String> {
-    let uri = std::env::var("MONGO_URI").map_err(|e| e.to_string())?;
-    let client = Client::with_uri_str(uri).await.map_err(|e| e.to_string())?;
+    let client = Client::with_uri_str(MONGO_URI)
+        .await
+        .map_err(|e| e.to_string())?;
 
     let db = client.database("timeSync");
     let collection = db.collection::<mongodb::bson::Document>("timeSync");
@@ -95,7 +100,7 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
 
     // ---------------- GET CLIPBOARD ----------------
 
-    let clipboard = arboard::Clipboard::new()
+    let clipboard = Clipboard::new()
         .map_err(|e| e.to_string())?
         .get_text()
         .map_err(|e| e.to_string())?
@@ -115,10 +120,7 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
 
     // ---------------- CONNECT MONGO ----------------
 
-    let uri = std::env::var("MONGO_URI")
-        .map_err(|e| e.to_string())?;
-
-    let client = Client::with_uri_str(uri)
+    let client = Client::with_uri_str(MONGO_URI)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -156,6 +158,66 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+
+#[command]
+async fn pair_checker(app_handle: AppHandle) -> Result<(), String> {
+    println!("checking .....");
+
+    // ---------------- GET DEVICE ID ----------------
+
+    let device_id = get_device_id(app_handle);
+
+    println!("Current device id: {}", device_id);
+
+    // ---------------- CONNECT MONGO ----------------
+
+    let client = Client::with_uri_str(MONGO_URI)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let db = client.database("timeSync");
+
+    let collection =
+        db.collection::<mongodb::bson::Document>("timeSync");
+
+    // ---------------- LOOP ----------------
+
+    loop {
+        let result = collection
+            .find_one(
+                doc! { "_id": device_id.clone() },
+                None
+            )
+            .await
+            .map_err(|e| e.to_string())?;
+
+        if let Some(document) = result {
+
+            // check if paired_to exists
+            if let Some(paired_to) = document.get_str("paired_to").ok() {
+
+                println!("PAIRED");
+                println!("paired_to -> {}", paired_to);
+
+                break;
+
+            } else {
+
+                println!("not paired");
+            }
+
+        } else {
+
+            println!("not paired");
+        }
+
+        tokio::time::sleep(Duration::from_secs(1)).await;
+    }
+
+    Ok(())
+}
+
+
 // ---------------- TIME + MONGO ----------------
 
 async fn fetch_host_time() -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
@@ -186,8 +248,7 @@ async fn save_time_to_mongo(
     sync_time: String,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
-    let uri = std::env::var("MONGO_URI")?;
-    let client = Client::with_uri_str(uri).await?;
+    let client = Client::with_uri_str(MONGO_URI).await?;
 
     let db = client.database("timeSync");
     let collection = db.collection::<mongodb::bson::Document>("timeSync");
@@ -315,8 +376,6 @@ fn monitor_vlc(mut child: Child, running: Arc<AtomicBool>) {
 // ---------------- MAIN ----------------
 
 pub fn run() {
-    dotenv().ok();
-
     tauri::Builder::default()
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
@@ -369,7 +428,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_device_id,
             set_hosting_true,
-            join_pairing // ✅ ADDED
+            join_pairing,
+            pair_checker
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
