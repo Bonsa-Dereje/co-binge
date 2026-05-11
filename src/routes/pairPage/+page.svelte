@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
     import { globalUserName, globalDeviceId } from '$lib/stores/user';
     import { invoke } from '@tauri-apps/api/core';
 
@@ -11,11 +12,13 @@
 
     let copied = false;
 
-    // NEW
+    // PAIR STATUS
     let paired = false;
 
     async function copyDeviceId() {
+
         try {
+
             await navigator.clipboard.writeText(deviceId);
 
             copied = true;
@@ -25,12 +28,15 @@
             }, 1500);
 
         } catch (err) {
+
             console.error("Copy failed:", err);
         }
     }
 
     function toggleDarkMode() {
+
         darkMode = !darkMode;
+
         document.body.classList.toggle("dark-mode", darkMode);
     }
 
@@ -42,26 +48,38 @@
 
         // CALL pair_checker ON PAGE LOAD
         invoke('pair_checker')
-            .then(() => {
+
+            .then(async () => {
 
                 console.log("pair_checker finished");
 
-                // WHEN RUST RETURNS -> PAIRED
+                // SUCCESS UI
                 paired = true;
+
+                // SMALL DELAY SO USER SEES TICK
+                await new Promise(resolve => setTimeout(resolve, 1200));
+
+                // GO TO PAGE
+                goto('/chooseApp');
             })
+
             .catch((err) => {
+
                 console.error("pair_checker error:", err);
             });
 
         const unsubscribeUser = globalUserName.subscribe(value => {
+
             username = value || 'user name';
         });
 
         const unsubscribeDevice = globalDeviceId.subscribe(value => {
+
             deviceId = value || '01D4TH879';
         });
 
         return () => {
+
             unsubscribeUser();
             unsubscribeDevice();
         };
@@ -73,6 +91,7 @@
 
         <!-- Toggle -->
         <div class="toggle-wrapper">
+
             <button
                 class="toggle"
                 class:active={darkMode}
@@ -80,21 +99,34 @@
             >
                 <div class="toggle-circle"></div>
             </button>
+
         </div>
 
         <!-- Center Content -->
         <div class="pair-wrapper">
 
-            <div class="title">This is your pairing ID</div>
-            <div class="subtitle">Send code to client</div>
+            <div class="title">
+                This is your pairing ID
+            </div>
+
+            <div class="subtitle">
+                Send code to client
+            </div>
 
             <!-- Device Box -->
             <div class="device-box">
-                <span class="device-id">{deviceId}</span>
 
-                <button class="copy-btn" on:click={copyDeviceId}>
+                <span class="device-id">
+                    {deviceId}
+                </span>
+
+                <button
+                    class="copy-btn"
+                    on:click={copyDeviceId}
+                >
                     {copied ? 'Copied' : 'Copy'}
                 </button>
+
             </div>
 
             <!-- Waiting / Success -->
@@ -102,7 +134,9 @@
 
                 {#if paired}
 
-                    <span class="paired-text">paired</span>
+                    <span class="paired-text">
+                        paired
+                    </span>
 
                     <div class="tick-wrapper">
                         ✓
@@ -110,7 +144,9 @@
 
                 {:else}
 
-                    <span>pairing</span>
+                    <span>
+                        pairing
+                    </span>
 
                     <div class="spinner"></div>
 
