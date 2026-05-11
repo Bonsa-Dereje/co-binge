@@ -11,14 +11,19 @@
 
     let copied = false;
 
+    // NEW
+    let paired = false;
+
     async function copyDeviceId() {
         try {
             await navigator.clipboard.writeText(deviceId);
+
             copied = true;
 
             setTimeout(() => {
                 copied = false;
             }, 1500);
+
         } catch (err) {
             console.error("Copy failed:", err);
         }
@@ -30,6 +35,7 @@
     }
 
     onMount(() => {
+
         requestAnimationFrame(() => {
             entering = false;
         });
@@ -37,7 +43,11 @@
         // CALL pair_checker ON PAGE LOAD
         invoke('pair_checker')
             .then(() => {
+
                 console.log("pair_checker finished");
+
+                // WHEN RUST RETURNS -> PAIRED
+                paired = true;
             })
             .catch((err) => {
                 console.error("pair_checker error:", err);
@@ -63,7 +73,7 @@
 
         <!-- Toggle -->
         <div class="toggle-wrapper">
-            <button 
+            <button
                 class="toggle"
                 class:active={darkMode}
                 on:click={toggleDarkMode}
@@ -87,10 +97,25 @@
                 </button>
             </div>
 
-            <!-- Waiting Text -->
+            <!-- Waiting / Success -->
             <div class="waiting-wrapper">
-                <span>pairing</span>
-                <div class="spinner"></div>
+
+                {#if paired}
+
+                    <span class="paired-text">paired</span>
+
+                    <div class="tick-wrapper">
+                        ✓
+                    </div>
+
+                {:else}
+
+                    <span>pairing</span>
+
+                    <div class="spinner"></div>
+
+                {/if}
+
             </div>
 
         </div>
@@ -98,9 +123,9 @@
         <!-- Bottom Profile -->
         <div class="profile-wrapper">
 
-            <img 
-                src="/avatars/girlAvatar.png" 
-                alt="avatar" 
+            <img
+                src="/avatars/girlAvatar.png"
+                alt="avatar"
                 class="profile-avatar"
             />
 
