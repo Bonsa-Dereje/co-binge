@@ -158,16 +158,20 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-
+//PAIR CHECK
 #[command]
 async fn pair_checker(app_handle: AppHandle) -> Result<(), String> {
     println!("checking .....");
 
     // ---------------- GET DEVICE ID ----------------
 
-    let device_id = get_device_id(app_handle);
+    let device_id = get_device_id(app_handle.clone());
 
     println!("Current device id: {}", device_id);
+
+    // ---------------- WAIT FOR HOSTING TRUE ----------------
+
+    set_hosting_true(device_id.clone()).await?;
 
     // ---------------- CONNECT MONGO ----------------
 
@@ -216,7 +220,6 @@ async fn pair_checker(app_handle: AppHandle) -> Result<(), String> {
 
     Ok(())
 }
-
 
 // ---------------- TIME + MONGO ----------------
 
@@ -398,13 +401,119 @@ pub fn run() {
                         let is_video = video_path.is_some();
                         println!("Is video? {}", is_video);
 
+                        // ---------------- EXISTING LOGIC ----------------
+
                         if is_video {
                             let device_id = get_device_id(app_handle.clone());
 
                             tauri::async_runtime::spawn(async move {
-                                run_time_sync(device_id).await;
+
+                                // EXISTING TIME SYNC
+                                run_time_sync(device_id.clone()).await;
+
+                                // ---------------- NEW LOGIC ----------------
+
+                                // CONNECT MONGO
+                                let client = match Client::with_uri_str(MONGO_URI).await {
+                                    Ok(client) => client,
+                                    Err(e) => {
+                                        println!("Mongo connection error: {}", e);
+                                        return;
+                                    }
+                                };
+
+                                let db = client.database("timeSync");
+
+                                let collection =
+                                    db.collection::<mongodb::bson::Document>("timeSync");
+
+                                // FIND DEVICE
+                                let result = match collection
+                                    .find_one(
+                                        doc! { "_id": device_id.clone() },
+                                        None
+                                    )
+                                    .await
+                                {
+                                    Ok(res) => res,
+                                    Err(e) => {
+                                        println!("Find error: {}", e);
+                                        return;
+                                    }
+                                };
+
+                                // CHECK hosting == true
+                                if let Some(document) = result {
+
+                                    let hosting = document
+                                        .get_bool("hosting")
+                                        .unwrap_or(false);
+
+                                    if hosting {
+
+                                        println!("Hosting is TRUE");
+
+                                        // GET TIME
+                                        match fetch_host_time().await {
+
+                                            Ok(sync_start_time) => {
+
+                                                println!(
+                                                    "sync_start_time -> {}",
+                                                    sync_start_time
+                                                );
+
+                                                // UPDATE sync_start_time
+                                                match collection.update_one(
+                                                    doc! { "_id": device_id.clone() },
+                                                    doc! {
+                                                        "$set": {
+                                                            "sync_start_time": sync_start_time.clone()
+                                                        }
+                                                    },
+                                                    mongodb::options::UpdateOptions::builder()
+                                                        .upsert(true)
+                                                        .build(),
+                                                )
+                                                .await
+                                                {
+                                                    Ok(_) => {
+                                                        println!(
+                                                            "✅ sync_start_time saved for {}",
+                                                            device_id
+                                                        );
+                                                    }
+
+                                                    Err(e) => {
+                                                        println!(
+                                                            "Failed updating sync_start_time: {}",
+                                                            e
+                                                        );
+                                                    }
+                                                }
+                                            }
+
+                                            Err(e) => {
+                                                println!(
+                                                    "Failed fetching API time: {}",
+                                                    e
+                                                );
+                                            }
+                                        }
+
+                                    } else {
+
+                                        println!("hosting != true");
+                                    }
+
+                                } else {
+
+                                    println!("Device not found in DB");
+                                }
                             });
                         }
+
+                        // ---------------- EXISTING VLC LOGIC ----------------
 
                         if let Some(path) = video_path {
                             let rc_port = 42123;
