@@ -231,11 +231,14 @@ async fn fetch_host_time() -> Result<String, Box<dyn std::error::Error + Send + 
         .as_str()
         .ok_or("Missing datetime field")?;
 
+    // Parse RFC3339 into UTC DateTime
     let mut date = chrono::DateTime::parse_from_rfc3339(datetime_str)?
         .with_timezone(&chrono::Utc);
 
+    // ADD 5 SECONDS SAFELY (chrono handles overflow internally)
     date = date + chrono::Duration::seconds(5);
 
+    // Ensure STRICT HH:MM:SS format matching your Mongo schema
     let sync_time = format!(
         "{:02}:{:02}:{:02}",
         date.hour(),
@@ -260,10 +263,12 @@ async fn save_time_to_mongo(
         doc! { "_id": device_id.clone() },
         doc! {
             "$set": {
-                "syncssTime": &sync_time
+                "syncTime": &sync_time
             }
         },
-        mongodb::options::UpdateOptions::builder().upsert(true).build(),
+        mongodb::options::UpdateOptions::builder()
+            .upsert(true)
+            .build(),
     ).await?;
 
     println!("✅ Saved for device {} -> {}", device_id, sync_time);
@@ -299,7 +304,7 @@ fn send_vlc_command(rc_port: u16, command: &str) -> Result<String, String> {
             let mut response = String::new();
             let _ = reader.read_line(&mut response);
 
-            Ok(response)
+            Ok(response.trim().to_string())
         }
         Err(e) => Err(format!("Failed to connect to VLC RC interface: {}", e)),
     }
@@ -317,25 +322,37 @@ fn start_vlc_with_rc(video_path: &PathBuf, rc_port: u16) -> Result<Child, std::i
 
 fn control_vlc_timeline(app_handle: AppHandle, rc_port: u16) {
     thread::spawn(move || {
-        thread::sleep(Duration::from_secs(2));
 
-        let _ = send_vlc_command(rc_port, "seek +0.1");
-        thread::sleep(Duration::from_millis(100));
-        let _ = send_vlc_command(rc_port, "pause");
-
+        // Wait for VLC to fully open
         thread::sleep(Duration::from_secs(5));
-        let _ = send_vlc_command(rc_port, "pause");
 
-        thread::sleep(Duration::from_secs(5));
-        let _ = send_vlc_command(rc_port, "seek +60");
+        loop {
 
-        thread::sleep(Duration::from_millis(200));
-        let _ = send_vlc_command(rc_port, "pause");
+            // Pause playback
+            let _ = send_vlc_command(rc_port, "pause");
 
-        thread::sleep(Duration::from_secs(3));
-        let _ = send_vlc_command(rc_port, "pause");
+            // Force seek to beginning
+            let _ = send_vlc_command(rc_port, "seek 0");
 
-        let _ = app_handle.emit("vlc:controlComplete", "Sequence complete");
+            // Ask VLC for current time
+            let response = send_vlc_command(rc_port, "get_time")
+                .unwrap_or_default();
+
+            println!("VLC Current Time: {}", response);
+
+            // If already at 0 stop checking
+            if response.trim() == "0" {
+                let _ = app_handle.emit(
+                    "vlc:controlComplete",
+                    "VLC locked at 0:00"
+                );
+
+                break;
+            }
+
+            // Check again every second
+            thread::sleep(Duration::from_secs(1));
+        }
     });
 }
 
