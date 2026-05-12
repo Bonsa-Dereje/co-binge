@@ -260,7 +260,7 @@ async fn save_time_to_mongo(
         doc! { "_id": device_id.clone() },
         doc! {
             "$set": {
-                "syncTime": &sync_time
+                "syncssTime": &sync_time
             }
         },
         mongodb::options::UpdateOptions::builder().upsert(true).build(),
@@ -408,10 +408,7 @@ pub fn run() {
 
                             tauri::async_runtime::spawn(async move {
 
-                                // EXISTING TIME SYNC
                                 run_time_sync(device_id.clone()).await;
-
-                                // ---------------- NEW LOGIC ----------------
 
                                 // CONNECT MONGO
                                 let client = match Client::with_uri_str(MONGO_URI).await {
@@ -427,12 +424,31 @@ pub fn run() {
                                 let collection =
                                     db.collection::<mongodb::bson::Document>("timeSync");
 
+                                // SET session_hot = true
+                                match collection.update_one(
+                                    doc! { "_id": device_id.clone() },
+                                    doc! {
+                                        "$set": {
+                                            "session_hot": true
+                                        }
+                                    },
+                                    mongodb::options::UpdateOptions::builder()
+                                        .upsert(true)
+                                        .build(),
+                                )
+                                .await
+                                {
+                                    Ok(_) => {
+                                        println!("✅ session_hot set to true");
+                                    }
+                                    Err(e) => {
+                                        println!("Failed updating session_hot: {}", e);
+                                    }
+                                }
+
                                 // FIND DEVICE
                                 let result = match collection
-                                    .find_one(
-                                        doc! { "_id": device_id.clone() },
-                                        None
-                                    )
+                                    .find_one(doc! { "_id": device_id.clone() }, None)
                                     .await
                                 {
                                     Ok(res) => res,
@@ -442,7 +458,6 @@ pub fn run() {
                                     }
                                 };
 
-                                // CHECK hosting == true
                                 if let Some(document) = result {
 
                                     let hosting = document
@@ -453,44 +468,14 @@ pub fn run() {
 
                                         println!("Hosting is TRUE");
 
-                                        // GET TIME
+                                        // ONLY CALL FETCH
                                         match fetch_host_time().await {
 
                                             Ok(sync_start_time) => {
-
                                                 println!(
-                                                    "sync_start_time -> {}",
+                                                    "Fetched sync_start_time -> {}",
                                                     sync_start_time
                                                 );
-
-                                                // UPDATE sync_start_time
-                                                match collection.update_one(
-                                                    doc! { "_id": device_id.clone() },
-                                                    doc! {
-                                                        "$set": {
-                                                            "sync_start_time": sync_start_time.clone()
-                                                        }
-                                                    },
-                                                    mongodb::options::UpdateOptions::builder()
-                                                        .upsert(true)
-                                                        .build(),
-                                                )
-                                                .await
-                                                {
-                                                    Ok(_) => {
-                                                        println!(
-                                                            "✅ sync_start_time saved for {}",
-                                                            device_id
-                                                        );
-                                                    }
-
-                                                    Err(e) => {
-                                                        println!(
-                                                            "Failed updating sync_start_time: {}",
-                                                            e
-                                                        );
-                                                    }
-                                                }
                                             }
 
                                             Err(e) => {
@@ -502,12 +487,10 @@ pub fn run() {
                                         }
 
                                     } else {
-
                                         println!("hosting != true");
                                     }
 
                                 } else {
-
                                     println!("Device not found in DB");
                                 }
                             });
