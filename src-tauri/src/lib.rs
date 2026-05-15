@@ -14,19 +14,15 @@ use std::io::{Write, BufRead, BufReader};
 
 use screenshots::Screen;
 
-// NEW IMPORTS
 use reqwest;
 use mongodb::{Client};
 use mongodb::bson::doc;
 use chrono::Timelike;
 
-// ADDED IMPORT
 use regex::Regex;
 use arboard::Clipboard;
 
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
-
-// ---------------- HARD CODED MONGO URI ----------------
 
 const MONGO_URI: &str =
     "mongodb+srv://coBinge:31211@cobinge.eicnmv9.mongodb.net/?appName=coBinge";
@@ -39,7 +35,6 @@ fn get_device_id(app_handle: AppHandle) -> String {
         .expect("failed to get app data dir");
 
     fs::create_dir_all(&path).ok();
-
     path.push("device_id.txt");
 
     if path.exists() {
@@ -54,11 +49,8 @@ fn get_device_id(app_handle: AppHandle) -> String {
         .collect();
 
     fs::write(&path, &id).expect("failed to write device id");
-
     id
 }
-
-// ---------------- NEW: HOST FLAG ----------------
 
 #[command]
 async fn set_hosting_true(device_id: String) -> Result<(), String> {
@@ -71,34 +63,22 @@ async fn set_hosting_true(device_id: String) -> Result<(), String> {
 
     collection.update_one(
         doc! { "_id": device_id.clone() },
-        doc! {
-            "$set": {
-                "hosting": true
-            }
-        },
+        doc! { "$set": { "hosting": true } },
         mongodb::options::UpdateOptions::builder().upsert(true).build(),
     )
     .await
     .map_err(|e| e.to_string())?;
 
     println!("✅ Hosting TRUE set for {}", device_id);
-
     Ok(())
 }
-
-// ---------------- NEW: JOIN PAIRING FUNCTION ----------------
 
 #[command]
 async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
     println!("JOIN FUNCTION CALLED");
 
-    // ---------------- GET DEVICE ID ----------------
-
     let device_id = get_device_id(app_handle.clone());
-
     println!("Current device id: {}", device_id);
-
-    // ---------------- GET CLIPBOARD ----------------
 
     let clipboard = Clipboard::new()
         .map_err(|e| e.to_string())?
@@ -109,38 +89,22 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
 
     println!("Clipboard text: {}", clipboard);
 
-    // ---------------- VALIDATE ----------------
-
-    let re = Regex::new(r"^[A-Z0-9]{12}$")
-        .map_err(|e| e.to_string())?;
-
+    let re = Regex::new(r"^[A-Z0-9]{12}$").map_err(|e| e.to_string())?;
     if !re.is_match(&clipboard) {
         return Err("Invalid pairing code format".to_string());
     }
-
-    // ---------------- CONNECT MONGO ----------------
 
     let client = Client::with_uri_str(MONGO_URI)
         .await
         .map_err(|e| e.to_string())?;
 
     let db = client.database("timeSync");
-
-    let collection =
-        db.collection::<mongodb::bson::Document>("timeSync");
-
-    // ---------------- UPDATE HOST ----------------
+    let collection = db.collection::<mongodb::bson::Document>("timeSync");
 
     let result = collection.update_one(
         doc! { "_id": clipboard.clone() },
-        doc! {
-            "$set": {
-                "paired_to": device_id.clone()
-            }
-        },
-        mongodb::options::UpdateOptions::builder()
-            .upsert(false)
-            .build(),
+        doc! { "$set": { "paired_to": device_id.clone() } },
+        mongodb::options::UpdateOptions::builder().upsert(false).build(),
     )
     .await
     .map_err(|e| e.to_string())?;
@@ -149,69 +113,41 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
         return Err("Host device not found in database".to_string());
     }
 
-    println!(
-        "🔗 Paired client {} -> host {}",
-        device_id,
-        clipboard
-    );
-
+    println!("🔗 Paired client {} -> host {}", device_id, clipboard);
     Ok(())
 }
 
-//PAIR CHECK
 #[command]
 async fn pair_checker(app_handle: AppHandle) -> Result<(), String> {
     println!("checking .....");
 
-    // ---------------- GET DEVICE ID ----------------
-
     let device_id = get_device_id(app_handle.clone());
-
     println!("Current device id: {}", device_id);
 
-    // ---------------- WAIT FOR HOSTING TRUE ----------------
-
     set_hosting_true(device_id.clone()).await?;
-
-    // ---------------- CONNECT MONGO ----------------
 
     let client = Client::with_uri_str(MONGO_URI)
         .await
         .map_err(|e| e.to_string())?;
 
     let db = client.database("timeSync");
-
-    let collection =
-        db.collection::<mongodb::bson::Document>("timeSync");
-
-    // ---------------- LOOP ----------------
+    let collection = db.collection::<mongodb::bson::Document>("timeSync");
 
     loop {
         let result = collection
-            .find_one(
-                doc! { "_id": device_id.clone() },
-                None
-            )
+            .find_one(doc! { "_id": device_id.clone() }, None)
             .await
             .map_err(|e| e.to_string())?;
 
         if let Some(document) = result {
-
-            // check if paired_to exists
             if let Some(paired_to) = document.get_str("paired_to").ok() {
-
                 println!("PAIRED");
                 println!("paired_to -> {}", paired_to);
-
                 break;
-
             } else {
-
                 println!("not paired");
             }
-
         } else {
-
             println!("not paired");
         }
 
@@ -231,14 +167,11 @@ async fn fetch_host_time() -> Result<String, Box<dyn std::error::Error + Send + 
         .as_str()
         .ok_or("Missing datetime field")?;
 
-    // Parse RFC3339 into UTC DateTime
     let mut date = chrono::DateTime::parse_from_rfc3339(datetime_str)?
         .with_timezone(&chrono::Utc);
 
-    // ADD 5 SECONDS SAFELY (chrono handles overflow internally)
     date = date + chrono::Duration::seconds(5);
 
-    // Ensure STRICT HH:MM:SS format matching your Mongo schema
     let sync_time = format!(
         "{:02}:{:02}:{:02}",
         date.hour(),
@@ -253,43 +186,49 @@ async fn save_time_to_mongo(
     device_id: String,
     sync_time: String,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-
     let client = Client::with_uri_str(MONGO_URI).await?;
-
     let db = client.database("timeSync");
     let collection = db.collection::<mongodb::bson::Document>("timeSync");
 
     collection.update_one(
         doc! { "_id": device_id.clone() },
-        doc! {
-            "$set": {
-                "syncTime": &sync_time
-            }
-        },
-        mongodb::options::UpdateOptions::builder()
-            .upsert(true)
-            .build(),
-    ).await?;
+        doc! { "$set": { "syncTime": &sync_time } },
+        mongodb::options::UpdateOptions::builder().upsert(true).build(),
+    )
+    .await?;
 
     println!("✅ Saved for device {} -> {}", device_id, sync_time);
-
     Ok(())
 }
 
 async fn run_time_sync(device_id: String) {
     if let Ok(time) = fetch_host_time().await {
         println!("Fetched time: {}", time);
-
         if let Err(e) = save_time_to_mongo(device_id, time).await {
             println!("Mongo save error: {:?}", e);
         }
     }
 }
 
+// ---------------- HELPERS ----------------
+
+/// Parse "HH:MM:SS" into total seconds
+fn parse_time_to_seconds(time_str: &str) -> Option<u32> {
+    let parts: Vec<&str> = time_str.trim().split(':').collect();
+    if parts.len() != 3 {
+        return None;
+    }
+    let h: u32 = parts[0].parse().ok()?;
+    let m: u32 = parts[1].parse().ok()?;
+    let s: u32 = parts[2].parse().ok()?;
+    Some(h * 3600 + m * 60 + s)
+}
+
 // ---------------- VLC ----------------
 
 fn send_vlc_command(rc_port: u16, command: &str) -> Result<String, String> {
     use std::net::TcpStream;
+    use std::io::{BufReader, Write, BufRead};
 
     match TcpStream::connect_timeout(
         &format!("127.0.0.1:{}", rc_port).parse().unwrap(),
@@ -304,7 +243,7 @@ fn send_vlc_command(rc_port: u16, command: &str) -> Result<String, String> {
             let mut response = String::new();
             let _ = reader.read_line(&mut response);
 
-            Ok(response.trim().to_string())
+            Ok(response)
         }
         Err(e) => Err(format!("Failed to connect to VLC RC interface: {}", e)),
     }
@@ -320,37 +259,159 @@ fn start_vlc_with_rc(video_path: &PathBuf, rc_port: u16) -> Result<Child, std::i
         .spawn()
 }
 
-fn control_vlc_timeline(app_handle: AppHandle, rc_port: u16) {
+fn control_vlc_timeline(app_handle: AppHandle, rc_port: u16, device_id: String) {
     thread::spawn(move || {
 
-        // Wait for VLC to fully open
+        // ── PHASE 1: wait for VLC to be open, then reset to 0:00 ──
+
         thread::sleep(Duration::from_secs(5));
 
         loop {
+            match send_vlc_command(rc_port, "get_time") {
+                Ok(current_time) => {
+                    let cleaned_time = current_time.trim();
+                    println!("VLC current time: {}", cleaned_time);
 
-            // Pause playback
-            let _ = send_vlc_command(rc_port, "pause");
+                    if cleaned_time == "0" {
+                        println!("VLC is now at 0:00");
 
-            // Force seek to beginning
-            let _ = send_vlc_command(rc_port, "seek 0");
+                        let _ = app_handle.emit(
+                            "vlc:controlComplete",
+                            "VLC initialized at 0:00",
+                        );
 
-            // Ask VLC for current time
-            let response = send_vlc_command(rc_port, "get_time")
-                .unwrap_or_default();
+                        break;
+                    }
 
-            println!("VLC Current Time: {}", response);
-
-            // If already at 0 stop checking
-            if response.trim() == "0" {
-                let _ = app_handle.emit(
-                    "vlc:controlComplete",
-                    "VLC locked at 0:00"
-                );
-
-                break;
+                    let _ = send_vlc_command(rc_port, "seek 0");
+                    let _ = send_vlc_command(rc_port, "stop");
+                    println!("Attempted to reset VLC timeline to 0:00");
+                }
+                Err(e) => {
+                    println!("Failed to get VLC time: {}", e);
+                }
             }
 
-            // Check again every second
+            thread::sleep(Duration::from_secs(1));
+        }
+
+        // ── PHASE 2: read syncTime from Mongo, add 8 s → target_time ──
+
+        println!("⏳ Fetching syncTime from Mongo for target_time...");
+
+        let target_seconds: u32 = {
+            let rt = tokio::runtime::Runtime::new().expect("failed to create tokio runtime");
+
+            rt.block_on(async {
+                let client = match Client::with_uri_str(MONGO_URI).await {
+                    Ok(c) => c,
+                    Err(e) => {
+                        println!("Mongo connect error (target fetch): {}", e);
+                        return 0u32;
+                    }
+                };
+
+                let collection = client
+                    .database("timeSync")
+                    .collection::<mongodb::bson::Document>("timeSync");
+
+                let doc_result = collection
+                    .find_one(doc! { "_id": device_id.clone() }, None)
+                    .await;
+
+                match doc_result {
+                    Ok(Some(document)) => {
+                        if let Ok(sync_time_str) = document.get_str("syncTime") {
+                            println!("📥 syncTime from Mongo: {}", sync_time_str);
+
+                            if let Some(secs) = parse_time_to_seconds(sync_time_str) {
+                                let target = secs + 8; // ✅ CHANGED: +5 → +8
+                                println!("🎯 target_time (seconds): {}", target);
+                                return target;
+                            }
+                        }
+                        println!("⚠️ syncTime field missing or unreadable");
+                        0u32
+                    }
+                    Ok(None) => {
+                        println!("⚠️ Device document not found in Mongo");
+                        0u32
+                    }
+                    Err(e) => {
+                        println!("Mongo find error: {}", e);
+                        0u32
+                    }
+                }
+            })
+        };
+
+        if target_seconds == 0 {
+            println!("❌ Could not resolve target_time — aborting sync-to-play");
+            return;
+        }
+
+        println!(
+            "⏱️ Polling API — will play VLC when seconds >= {}",
+            target_seconds
+        );
+
+        // ── FIX: NO %60 MATCHING (this caused missed trigger) ──
+
+        let mut rt = tokio::runtime::Runtime::new().expect("tokio rt");
+
+        loop {
+            let ping_time_str = rt.block_on(async {
+                match reqwest::get("https://time.now/developer/api/ip").await {
+                    Ok(res) => match res.json::<serde_json::Value>().await {
+                        Ok(json) => json["datetime"]
+                            .as_str()
+                            .and_then(|s| chrono::DateTime::parse_from_rfc3339(s).ok())
+                            .map(|dt| {
+                                let utc = dt.with_timezone(&chrono::Utc);
+                                format!(
+                                    "{:02}:{:02}:{:02}",
+                                    utc.hour(),
+                                    utc.minute(),
+                                    utc.second()
+                                )
+                            }),
+                        Err(e) => {
+                            println!("JSON parse error: {}", e);
+                            None
+                        }
+                    },
+                    Err(e) => {
+                        println!("API fetch error: {}", e);
+                        None
+                    }
+                }
+            });
+
+            if let Some(ping_str) = ping_time_str {
+                println!("🕐 ping_time: {}", ping_str);
+
+                if let Some(ping_seconds) = parse_time_to_seconds(&ping_str) {
+                    println!(
+                        "   ping={} | target={}",
+                        ping_seconds, target_seconds
+                    );
+
+                    // ✅ FIXED: reliable trigger (no missed second window)
+                    if ping_seconds >= target_seconds {
+                        println!("▶️ Time reached — firing VLC play!");
+
+                        let _ = send_vlc_command(rc_port, "play");
+
+                        let _ = app_handle.emit(
+                            "vlc:syncPlay",
+                            format!("Played at ping_time={}", ping_str),
+                        );
+
+                        break;
+                    }
+                }
+            }
+
             thread::sleep(Duration::from_secs(1));
         }
     });
@@ -367,11 +428,9 @@ fn start_screenshot_loop(app_handle: AppHandle, running: Arc<AtomicBool>) {
 
         output_dir.push("syncCalc");
         output_dir.push("Images");
-
         fs::create_dir_all(&output_dir).ok();
 
         let screen = Screen::all().unwrap().first().unwrap().clone();
-
         let mut counter = 0;
 
         while running.load(Ordering::Relaxed) {
@@ -379,7 +438,6 @@ fn start_screenshot_loop(app_handle: AppHandle, running: Arc<AtomicBool>) {
                 let file_path = output_dir.join(format!("screenshot_{}.png", counter));
                 let _ = image.save(&file_path);
             }
-
             counter += 1;
             thread::sleep(Duration::from_secs(5));
         }
@@ -399,7 +457,6 @@ pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
-
             let window_for_event = window.clone();
             let app_handle = app.handle().clone();
 
@@ -418,7 +475,7 @@ pub fn run() {
                         let is_video = video_path.is_some();
                         println!("Is video? {}", is_video);
 
-                        // ---------------- EXISTING LOGIC ----------------
+                        // ── EXISTING ASYNC LOGIC ──
 
                         if is_video {
                             let device_id = get_device_id(app_handle.clone());
@@ -427,7 +484,6 @@ pub fn run() {
 
                                 run_time_sync(device_id.clone()).await;
 
-                                // CONNECT MONGO
                                 let client = match Client::with_uri_str(MONGO_URI).await {
                                     Ok(client) => client,
                                     Err(e) => {
@@ -437,33 +493,22 @@ pub fn run() {
                                 };
 
                                 let db = client.database("timeSync");
-
                                 let collection =
                                     db.collection::<mongodb::bson::Document>("timeSync");
 
-                                // SET session_hot = true
                                 match collection.update_one(
                                     doc! { "_id": device_id.clone() },
-                                    doc! {
-                                        "$set": {
-                                            "session_hot": true
-                                        }
-                                    },
+                                    doc! { "$set": { "session_hot": true } },
                                     mongodb::options::UpdateOptions::builder()
                                         .upsert(true)
                                         .build(),
                                 )
                                 .await
                                 {
-                                    Ok(_) => {
-                                        println!("✅ session_hot set to true");
-                                    }
-                                    Err(e) => {
-                                        println!("Failed updating session_hot: {}", e);
-                                    }
+                                    Ok(_) => println!("✅ session_hot set to true"),
+                                    Err(e) => println!("Failed updating session_hot: {}", e),
                                 }
 
-                                // FIND DEVICE
                                 let result = match collection
                                     .find_one(doc! { "_id": device_id.clone() }, None)
                                     .await
@@ -476,54 +521,49 @@ pub fn run() {
                                 };
 
                                 if let Some(document) = result {
-
-                                    let hosting = document
-                                        .get_bool("hosting")
-                                        .unwrap_or(false);
+                                    let hosting = document.get_bool("hosting").unwrap_or(false);
 
                                     if hosting {
-
                                         println!("Hosting is TRUE");
 
-                                        // ONLY CALL FETCH
                                         match fetch_host_time().await {
-
                                             Ok(sync_start_time) => {
                                                 println!(
                                                     "Fetched sync_start_time -> {}",
                                                     sync_start_time
                                                 );
                                             }
-
                                             Err(e) => {
-                                                println!(
-                                                    "Failed fetching API time: {}",
-                                                    e
-                                                );
+                                                println!("Failed fetching API time: {}", e);
                                             }
                                         }
-
                                     } else {
                                         println!("hosting != true");
                                     }
-
                                 } else {
                                     println!("Device not found in DB");
                                 }
                             });
                         }
 
-                        // ---------------- EXISTING VLC LOGIC ----------------
+                        // ── EXISTING VLC LOGIC — now passes device_id to control_vlc_timeline ──
 
                         if let Some(path) = video_path {
                             let rc_port = 42123;
+                            let device_id_for_vlc = get_device_id(app_handle.clone());
 
                             if let Ok(child) = start_vlc_with_rc(&path, rc_port) {
                                 let running = Arc::new(AtomicBool::new(true));
 
                                 start_screenshot_loop(app_handle.clone(), running.clone());
                                 monitor_vlc(child, running.clone());
-                                control_vlc_timeline(app_handle.clone(), rc_port);
+
+                                // Pass device_id so the sync thread can read syncTime
+                                control_vlc_timeline(
+                                    app_handle.clone(),
+                                    rc_port,
+                                    device_id_for_vlc,
+                                );
                             }
                         }
 
