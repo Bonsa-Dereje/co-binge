@@ -123,6 +123,8 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
 
     let collection_clone = collection.clone();
     let pairing_code = clipboard.clone();
+    let app_handle_clone = app_handle.clone();
+    let device_id_clone = device_id.clone();
 
     tauri::async_runtime::spawn(async move {
 
@@ -175,6 +177,30 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
                                             "✅ File found at: {:?}",
                                             found_path
                                         );
+
+                                        // ---------------- VLC OPEN ----------------
+
+                                        let rc_port = 4212;
+
+                                        match start_vlc_with_rc(&found_path, rc_port) {
+                                            Ok(_) => {
+                                                println!("✅ VLC started successfully");
+
+                                                // HANDLE SEEK / PLAY / TIMELINE SYNC
+                                                control_vlc_timeline(
+                                                    app_handle_clone.clone(),
+                                                    rc_port,
+                                                    device_id_clone.clone(),
+                                                );
+                                            }
+
+                                            Err(e) => {
+                                                println!(
+                                                    "❌ Failed to start VLC: {}",
+                                                    e
+                                                );
+                                            }
+                                        }
                                     }
 
                                     None => {
@@ -212,7 +238,6 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
 
     Ok(())
 }
-
 
 #[command]
 async fn pair_checker(app_handle: AppHandle) -> Result<(), String> {
