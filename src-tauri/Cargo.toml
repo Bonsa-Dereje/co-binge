@@ -40,3 +40,6 @@ dotenvy = "0.15"
 
 arboard = "3"
 regex = "1"
+
+walkdir = "2"
+dirs = "5"

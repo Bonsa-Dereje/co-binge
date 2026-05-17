@@ -22,6 +22,7 @@ use chrono::Timelike;
 use regex::Regex;
 use arboard::Clipboard;
 
+
 const VIDEO_EXTENSIONS: [&str; 7] = ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"];
 
 const MONGO_URI: &str =
@@ -77,6 +78,8 @@ async fn set_hosting_true(device_id: String) -> Result<(), String> {
 async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
     println!("JOIN FUNCTION CALLED");
 
+    use std::path::{Path, PathBuf};
+
     let device_id = get_device_id(app_handle.clone());
     println!("Current device id: {}", device_id);
 
@@ -122,6 +125,30 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
     let pairing_code = clipboard.clone();
 
     tauri::async_runtime::spawn(async move {
+
+        // ---------------- FAST FILE SEARCH FUNCTION ----------------
+        fn search_file_fast(start_dir: &Path, target_file: &str) -> Option<PathBuf> {
+            use walkdir::WalkDir;
+
+            for entry in WalkDir::new(start_dir)
+                .follow_links(false)
+                .into_iter()
+                .filter_map(|e| e.ok())
+            {
+                let path = entry.path();
+
+                if path.is_file() {
+                    if let Some(name) = path.file_name() {
+                        if name.to_string_lossy().eq_ignore_ascii_case(target_file) {
+                            return Some(path.to_path_buf());
+                        }
+                    }
+                }
+            }
+
+            None
+        }
+
         loop {
             match collection_clone
                 .find_one(doc! { "_id": pairing_code.clone() }, None)
@@ -131,7 +158,39 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
                     match doc.get_str("fileName") {
                         Ok(file_name) => {
                             println!("fileName found: {}", file_name);
+
+                            // STOP LOOP IMMEDIATELY
+                            println!("Stopping Mongo polling...");
+
+                            // ---------------- SEARCH DOWNLOADS FOLDER ----------------
+                            if let Some(downloads_dir) = dirs::download_dir() {
+                                println!(
+                                    "Searching Downloads folder: {:?}",
+                                    downloads_dir
+                                );
+
+                                match search_file_fast(&downloads_dir, file_name) {
+                                    Some(found_path) => {
+                                        println!(
+                                            "✅ File found at: {:?}",
+                                            found_path
+                                        );
+                                    }
+
+                                    None => {
+                                        println!(
+                                            "❌ File not found in Downloads folder"
+                                        );
+                                    }
+                                }
+                            } else {
+                                println!("Could not locate Downloads folder");
+                            }
+
+                            // BREAK LOOP AFTER FINDING fileName
+                            break;
                         }
+
                         Err(_) => {
                             println!("Waiting for fileName...");
                         }
@@ -153,6 +212,8 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
 
     Ok(())
 }
+
+
 #[command]
 async fn pair_checker(app_handle: AppHandle) -> Result<(), String> {
     println!("checking .....");
