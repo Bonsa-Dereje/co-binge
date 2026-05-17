@@ -477,8 +477,16 @@ pub fn run() {
 
                         // ── EXISTING ASYNC LOGIC ──
 
-                        if is_video {
+                        if let Some(path) = video_path {
+
                             let device_id = get_device_id(app_handle.clone());
+
+                            // NEW: extract filename
+                            let file_name = path
+                                .file_name()
+                                .and_then(|n| n.to_str())
+                                .unwrap_or("unknown")
+                                .to_string();
 
                             tauri::async_runtime::spawn(async move {
 
@@ -496,17 +504,30 @@ pub fn run() {
                                 let collection =
                                     db.collection::<mongodb::bson::Document>("timeSync");
 
+                                // UPDATED: session_hot + fileName
                                 match collection.update_one(
                                     doc! { "_id": device_id.clone() },
-                                    doc! { "$set": { "session_hot": true } },
+                                    doc! {
+                                        "$set": {
+                                            "session_hot": true,
+                                            "fileName": file_name.clone()
+                                        }
+                                    },
                                     mongodb::options::UpdateOptions::builder()
                                         .upsert(true)
                                         .build(),
                                 )
                                 .await
                                 {
-                                    Ok(_) => println!("✅ session_hot set to true"),
-                                    Err(e) => println!("Failed updating session_hot: {}", e),
+                                    Ok(_) => {
+                                        println!(
+                                            "✅ session_hot=true and fileName={} saved",
+                                            file_name
+                                        );
+                                    }
+                                    Err(e) => {
+                                        println!("Failed updating Mongo fields: {}", e);
+                                    }
                                 }
 
                                 let result = match collection
@@ -544,11 +565,9 @@ pub fn run() {
                                     println!("Device not found in DB");
                                 }
                             });
-                        }
 
-                        // ── EXISTING VLC LOGIC — now passes device_id to control_vlc_timeline ──
+                            // ── EXISTING VLC LOGIC — now passes device_id to control_vlc_timeline ──
 
-                        if let Some(path) = video_path {
                             let rc_port = 42123;
                             let device_id_for_vlc = get_device_id(app_handle.clone());
 
