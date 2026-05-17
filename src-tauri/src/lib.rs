@@ -114,9 +114,45 @@ async fn join_pairing(app_handle: AppHandle) -> Result<(), String> {
     }
 
     println!("🔗 Paired client {} -> host {}", device_id, clipboard);
+
+    // ---------------- NEW LOGIC ----------------
+    // Ping Mongo every second looking for "fileName"
+
+    let collection_clone = collection.clone();
+    let pairing_code = clipboard.clone();
+
+    tauri::async_runtime::spawn(async move {
+        loop {
+            match collection_clone
+                .find_one(doc! { "_id": pairing_code.clone() }, None)
+                .await
+            {
+                Ok(Some(doc)) => {
+                    match doc.get_str("fileName") {
+                        Ok(file_name) => {
+                            println!("fileName found: {}", file_name);
+                        }
+                        Err(_) => {
+                            println!("Waiting for fileName...");
+                        }
+                    }
+                }
+
+                Ok(None) => {
+                    println!("Host document not found");
+                }
+
+                Err(e) => {
+                    println!("Mongo polling error: {}", e);
+                }
+            }
+
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        }
+    });
+
     Ok(())
 }
-
 #[command]
 async fn pair_checker(app_handle: AppHandle) -> Result<(), String> {
     println!("checking .....");
