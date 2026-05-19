@@ -1,4 +1,4 @@
-# Co-Binge
+markdown# Co-Binge
 
 Co-Binge is a desktop application that allows users to watch any form of media together in real time. It automatically synchronizes playback across devices, intelligently handling pauses, buffering, and network delays to keep everyone perfectly in sync.
 
@@ -8,11 +8,11 @@ The platform also includes a live chat system with sticker support, creating a s
 
 # Tech Stack
 
-## Core Technologies
-
 <p>
-<img src="https://skillicons.dev/icons?i=svelte,js,html,css,rust" />
+<img src="https://skillicons.dev/icons?i=svelte,js,html,css,rust,nodejs,tauri,mongodb,supabase,git,github,vscode" />
 </p>
+
+## Core Technologies
 
 | Technology     | Description                                           |
 | -------------- | ----------------------------------------------------- |
@@ -25,23 +25,7 @@ The platform also includes a live chat system with sticker support, creating a s
 
 ---
 
-# Preview
-
-<img width="100%" alt="preview" src="docs/preview.png">
-
----
-
-## Sync Architecture
-
-<img width="100%" alt="sync flow" src="docs/syncFlow.png">
-
----
-
 ## Runtime & Platform
-
-<p>
-<img src="https://skillicons.dev/icons?i=nodejs,tauri" />
-</p>
 
 | Tool        | Purpose                                               |
 | ----------- | ----------------------------------------------------- |
@@ -52,39 +36,39 @@ The platform also includes a live chat system with sticker support, creating a s
 
 ## Syncing
 
-<p>
-<img src="https://skillicons.dev/icons?i=mongodb" />
-</p>
-
-| Tool        | Purpose                                                        |
-| ----------- | -------------------------------------------------------------- |
+| Tool        | Purpose                                                           |
+| ----------- | ----------------------------------------------------------------- |
 | **MongoDB** | Stores sync state, session data, and playback events in real time |
 
 ---
 
 ## User Data
 
-<p>
-<img src="https://skillicons.dev/icons?i=supabase" />
-</p>
-
-| Tool          | Purpose                                          |
-| ------------- | ------------------------------------------------ |
-| **Supabase**  | Manages user authentication and profile data     |
+| Tool         | Purpose                                          |
+| ------------ | ------------------------------------------------ |
+| **Supabase** | Manages user authentication and profile data     |
 
 ---
 
 ## Development Tools
-
-<p>
-<img src="https://skillicons.dev/icons?i=git,github,vscode" />
-</p>
 
 | Tool        | Purpose                         |
 | ----------- | ------------------------------- |
 | **Git**     | Version control                 |
 | **GitHub**  | Code hosting                    |
 | **VS Code** | Primary development environment |
+
+---
+
+# Preview
+
+<img width="100%" alt="preview" src="docs/preview.png">
+
+---
+
+# Sync Architecture
+
+<img width="100%" alt="sync flow" src="docs/syncFlow.png">
 
 ---
 
@@ -103,8 +87,6 @@ The platform also includes a live chat system with sticker support, creating a s
 ---
 
 # Project Structure
-
-```
 co-binge
 │
 ├── src
@@ -125,7 +107,6 @@ co-binge
 │
 ├── package.json
 └── README.md
-```
 
 ---
 
@@ -156,10 +137,7 @@ npm run dev
 ```
 
 Open the app in your browser
-
-```
 http://localhost:5173
-```
 
 ---
 
@@ -194,5 +172,3 @@ npm run preview
 # License
 
 MIT License
-```
-
