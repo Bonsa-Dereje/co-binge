@@ -12,6 +12,19 @@ The platform also includes a live chat system with sticker support, creating a s
 <img src="https://skillicons.dev/icons?i=svelte,js,html,css,rust,nodejs,tauri,mongodb,supabase,git,github,vscode" />
 </p>
 
+---
+
+# Preview
+
+<img width="100%" alt="preview" src="docs/preview.png">
+
+---
+
+# Sync Architecture
+
+<img width="100%" alt="sync flow" src="docs/syncFlow.png">
+
+---
 ## Core Technologies
 
 | Technology     | Description                                           |
@@ -59,19 +72,6 @@ The platform also includes a live chat system with sticker support, creating a s
 | **VS Code** | Primary development environment |
 
 ---
-
-# Preview
-
-<img width="100%" alt="preview" src="docs/preview.png">
-
----
-
-# Sync Architecture
-
-<img width="100%" alt="sync flow" src="docs/syncFlow.png">
-
----
-
 # Features
 
 * Smooth page transitions
