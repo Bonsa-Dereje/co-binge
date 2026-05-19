@@ -30,6 +30,13 @@ The platform also includes a live chat system with sticker support, creating a s
 <img width="100%" alt="preview" src="docs/preview.png">
 
 ---
+
+## Sync Architecture
+
+<img width="100%" alt="sync flow" src="docs/syncFlow.png">
+
+---
+
 ## Runtime & Platform
 
 <p>
@@ -40,6 +47,30 @@ The platform also includes a live chat system with sticker support, creating a s
 | ----------- | ----------------------------------------------------- |
 | **Node.js** | Development runtime                                   |
 | **Tauri**   | Desktop app framework for packaging the app with Rust |
+
+---
+
+## Syncing
+
+<p>
+<img src="https://skillicons.dev/icons?i=mongodb" />
+</p>
+
+| Tool        | Purpose                                                        |
+| ----------- | -------------------------------------------------------------- |
+| **MongoDB** | Stores sync state, session data, and playback events in real time |
+
+---
+
+## User Data
+
+<p>
+<img src="https://skillicons.dev/icons?i=supabase" />
+</p>
+
+| Tool          | Purpose                                          |
+| ------------- | ------------------------------------------------ |
+| **Supabase**  | Manages user authentication and profile data     |
 
 ---
 
@@ -163,4 +194,5 @@ npm run preview
 # License
 
 MIT License
+```
 
